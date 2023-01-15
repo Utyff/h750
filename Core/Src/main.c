@@ -105,9 +105,6 @@ int main(void)
   if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK) {
       Error_Handler();
   }
-  if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2) != HAL_OK) {
-      Error_Handler();
-  }
 
   /* USER CODE END 2 */
 
@@ -117,7 +114,6 @@ int main(void)
 #pragma ide diagnostic ignored "EndlessLoop"
   while (1)
   {
-      i++;
 //      HAL_Delay(30);
 //      __NOP();
 //      __NOP();
@@ -125,6 +121,46 @@ int main(void)
 //      __NOP();
 //      HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
      GPIOA->ODR ^= GPIO_ODR_OD6_Msk;
+      i++;
+
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+      __NOP();
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -218,7 +254,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 199;
+  htim1.Init.Period = 19;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -243,7 +279,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 60;
+  sConfigOC.Pulse = 6;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -327,11 +363,6 @@ static void MX_TIM4_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 600;
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN TIM4_Init 2 */
 
   /* USER CODE END TIM4_Init 2 */
@@ -349,13 +380,24 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, LED4_Pin|LED6_Pin|LED5_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : BTN1_Pin */
+  GPIO_InitStruct.Pin = BTN1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(BTN1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA6 */
   GPIO_InitStruct.Pin = GPIO_PIN_6;
@@ -363,6 +405,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LED4_Pin LED6_Pin LED5_Pin */
+  GPIO_InitStruct.Pin = LED4_Pin|LED6_Pin|LED5_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
