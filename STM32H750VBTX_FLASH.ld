@@ -162,6 +162,36 @@ SECTIONS
     . = ALIGN(8);
   } >RAM_D1
 
+  /* used by the startup to initialize data */
+/*  _siRAM_D2 = LOADADDR(.RAM_D2);*/
+
+  /* Initialized data sections goes into RAM_D2, load LMA copy after code */
+  .RAM_D2 :
+  {
+    . = ALIGN(4);
+    _sRAM_D2 = .;        /* create a global symbol at data start */
+    *(.RAM_D2)           /* .data sections */
+    *(.RAM_D2*)          /* .data* sections */
+
+    . = ALIGN(4);
+    _eRAM_D2 = .;        /* define a global symbol at data end */
+  } >RAM_D2 AT> FLASH
+
+  /* used by the startup to initialize data */
+/*  _siRAM_D3 = LOADADDR(.RAM_D3);*/
+
+  /* Initialized data sections goes into RAM_D3, load LMA copy after code */
+  .RAM_D3 :
+  {
+    . = ALIGN(4);
+    _sRAM_D3 = .;        /* create a global symbol at data start */
+    *(.RAM_D3)           /* .data sections */
+    *(.RAM_D3*)          /* .data* sections */
+
+    . = ALIGN(4);
+    _eRAM_D3 = .;        /* define a global symbol at data end */
+  } >RAM_D3 AT> FLASH
+
   /* Remove information from the standard libraries */
   /DISCARD/ :
   {
@@ -172,5 +202,3 @@ SECTIONS
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
-
-

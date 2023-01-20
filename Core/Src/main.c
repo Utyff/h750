@@ -41,7 +41,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 TIM_HandleTypeDef htim1;
-TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
 
@@ -50,7 +49,6 @@ TIM_HandleTypeDef htim4;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_TIM4_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -58,7 +56,75 @@ static void MX_TIM1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int i;
+int count;
+#define SECTION_RAM_D2 __attribute__((section(".RAM_D2"))) /* AHB SRAM (D2 domain): */
+#define SECTION_RAM_D3 __attribute__((section(".RAM_D3"))) /* AHB SRAM (D3 domain): */
+
+// DMA-Memory: Global Array in SRAM1, 32byte-aligned
+uint16_t __ALIGNED(4)  SECTION_RAM_D2 samples[2048]; // = {1, 2, 3, 4, 5, 6, 7, 8};
+uint16_t samplesCount = 0;
+
+void TIM3_Init() {
+    // set PA7 for TIM3 CH2
+    // Very high speed PA7
+    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED7_Msk, GPIO_OSPEEDR_OSPEED7_0|GPIO_OSPEEDR_OSPEED7_1);
+    // Set PA7 - AF2 - TIM3 CH2
+    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL7_Msk, GPIO_AFRL_AFSEL7_1);
+    // Select AF mode (10) on PA7
+    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODE7_Msk, GPIO_MODER_MODE7_1);
+
+    // Initialize TIM3
+    RCC->APB1LENR |= RCC_APB1LENR_TIM3EN;
+//    TIM3-> |= ; // select clock source TIM3
+    // Set the Prescaler value
+    TIM3->PSC = 0;  // tim3Prescaler; // 200MHz /1 = 200mHz
+    // Set the Autoreload value
+    TIM3->ARR = 199; // tim3Period;  // 200MHz / 200 = 1Mz
+    TIM3->CR1 |= TIM_CR1_CEN;
+    TIM3->DIER |= TIM_DIER_UIE ;//| TIM_DIER_CC2IE; // interrupt on update and CC2
+    NVIC_EnableIRQ(TIM3_IRQn);
+//    NVIC_SetPriority(TIM3_IRQn, 0, 0);
+
+    // Configure the Channel 2 in PWM mode
+    // Disable the Channel 2: Reset the CC2E Bit
+    TIM3->CCER &= ~TIM_CCER_CC2E;
+    // Select the PWM mode 1 - 0110
+    TIM3->CCMR1 |= ((uint32_t) TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2);
+    // Set the Capture Compare Register value
+    TIM3->CCR2 = 60; // tim3 CC2 Pulse;
+    // Set the Preload enable for channel1
+    TIM3->CCMR1 |= TIM_CCMR1_OC2PE;
+    // Configure the Output Fast mode
+    TIM3->CCMR1 &= ~TIM_CCMR1_OC2FE;
+    // Enable the Capture compare channel
+    TIM3->CCER |= TIM_CCER_CC2E;
+    // Enable the main output
+//    TIM3->BDTR |= TIM_BDTR_MOE;
+    // Enable the Peripheral
+    TIM3->CR1 |= TIM_CR1_CEN;
+}
+
+uint32_t t3count1 = 0;
+
+void TIM3_IRQHandler(void) {
+    GPIOD->BSRR = GPIO_BSRR_BS10;
+
+    if (TIM3->SR | TIM_SR_UIF) {
+        t3count1++;
+        // Clear the update interrupt flag (UIF)
+        WRITE_REG(TIM3->SR, ~(TIM_SR_UIF));
+        samples[samplesCount++] = (uint16_t) GPIOE->IDR;
+        if (samplesCount >= (sizeof(samples) / sizeof(samples[0]))) {
+            samplesCount = 0;
+        }
+    }
+//    if (TIM3->SR | TIM_SR_CC2IF) {
+//        t3count3++;
+//        // Clear the Capture/Compare 2 interrupt flag (CC2F)
+//        WRITE_REG(TIM3->SR, ~(TIM_SR_CC2IF));
+//    }
+    GPIOD->BSRR = GPIO_BSRR_BR10;
+}
 
 /* USER CODE END 0 */
 
@@ -96,16 +162,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM4_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   if (HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1)!= HAL_OK) {
       Error_Handler();
   }
-  if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK) {
-      Error_Handler();
-  }
-
+  TIM3_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -114,53 +176,9 @@ int main(void)
 #pragma ide diagnostic ignored "EndlessLoop"
   while (1)
   {
-//      HAL_Delay(30);
-//      __NOP();
-//      __NOP();
-//      __NOP();
-//      __NOP();
-//      HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_6);
-     GPIOA->ODR ^= GPIO_ODR_OD6_Msk;
-      i++;
-
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-      __NOP();
-
-
+      GPIOB->ODR ^= LED4_Pin;
+      count++;
+      HAL_Delay(300);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -254,7 +272,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 19;
+  htim1.Init.Period = 199;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -279,7 +297,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 6;
+  sConfigOC.Pulse = 60;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -312,65 +330,6 @@ static void MX_TIM1_Init(void)
 }
 
 /**
-  * @brief TIM4 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM4_Init(void)
-{
-
-  /* USER CODE BEGIN TIM4_Init 0 */
-
-  /* USER CODE END TIM4_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-
-  /* USER CODE BEGIN TIM4_Init 1 */
-
-  /* USER CODE END TIM4_Init 1 */
-  htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 2;
-  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 999;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 300;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM4_Init 2 */
-
-  /* USER CODE END TIM4_Init 2 */
-  HAL_TIM_MspPostInit(&htim4);
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -380,11 +339,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
@@ -393,10 +352,26 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED4_Pin|LED6_Pin|LED5_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
+                          |GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PE2 PE3 PE4 PE5
+                           PE6 PE7 PE8 PE9
+                           PE10 PE11 PE12 PE13
+                           PE14 PE15 PE0 PE1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5
+                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
+                          |GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
+                          |GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_0|GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
   /*Configure GPIO pin : BTN1_Pin */
   GPIO_InitStruct.Pin = BTN1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(BTN1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA6 */
@@ -413,6 +388,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PD10 PD11 PD12 PD13
+                           PD14 PD15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
+                          |GPIO_PIN_14|GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
 }
 
 /* USER CODE BEGIN 4 */
@@ -428,9 +412,12 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "EndlessLoop"
   while (1)
   {
   }
+#pragma clang diagnostic pop
   /* USER CODE END Error_Handler_Debug */
 }
 
