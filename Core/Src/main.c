@@ -61,16 +61,17 @@ int count;
 #define SECTION_RAM_D3 __attribute__((section(".RAM_D3"))) /* AHB SRAM (D3 domain): */
 
 // DMA-Memory: Global Array in SRAM1, 32byte-aligned
-uint16_t __ALIGNED(4)  SECTION_RAM_D2 samples[2048]; // = {1, 2, 3, 4, 5, 6, 7, 8};
+uint16_t __ALIGNED(4)  SECTION_RAM_D2 samples[2048];
 uint16_t samplesCount = 0;
 
 void TIM3_Init() {
-    // set PA7 for TIM3 CH2
+    SET_BIT(RCC->AHB4ENR, RCC_AHB4ENR_GPIOAEN);
+    // setup PA7 for TIM3 CH2
     // Very high speed PA7
     MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED7_Msk, GPIO_OSPEEDR_OSPEED7_0|GPIO_OSPEEDR_OSPEED7_1);
-    // Set PA7 - AF2 - TIM3 CH2
+    // Set AF2 (TIM3 CH2) for PA7
     MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL7_Msk, GPIO_AFRL_AFSEL7_1);
-    // Select AF mode (10) on PA7
+    // Select PA7 mode - AF (10)
     MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODE7_Msk, GPIO_MODER_MODE7_1);
 
     // Initialize TIM3
@@ -80,8 +81,8 @@ void TIM3_Init() {
     TIM3->PSC = 0;  // tim3Prescaler; // 200MHz /1 = 200mHz
     // Set the Autoreload value
     TIM3->ARR = 199; // tim3Period;  // 200MHz / 200 = 1Mz
-    TIM3->CR1 |= TIM_CR1_CEN;
-    TIM3->DIER |= TIM_DIER_UIE ;//| TIM_DIER_CC2IE; // interrupt on update and CC2
+//    TIM3->DIER |= TIM_DIER_UIE; // interrupt on update
+    TIM3->DIER |= TIM_DIER_CC2IE; // interrupt on CC2
     NVIC_EnableIRQ(TIM3_IRQn);
 //    NVIC_SetPriority(TIM3_IRQn, 0, 0);
 
@@ -91,7 +92,7 @@ void TIM3_Init() {
     // Select the PWM mode 1 - 0110
     TIM3->CCMR1 |= ((uint32_t) TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2);
     // Set the Capture Compare Register value
-    TIM3->CCR2 = 60; // tim3 CC2 Pulse;
+    TIM3->CCR2 = 100; // tim3 CC2 Pulse
     // Set the Preload enable for channel1
     TIM3->CCMR1 |= TIM_CCMR1_OC2PE;
     // Configure the Output Fast mode
@@ -105,24 +106,25 @@ void TIM3_Init() {
 }
 
 uint32_t t3count1 = 0;
+uint32_t t3count2 = 0;
 
 void TIM3_IRQHandler(void) {
     GPIOD->BSRR = GPIO_BSRR_BS10;
 
-    if (TIM3->SR | TIM_SR_UIF) {
-        t3count1++;
-        // Clear the update interrupt flag (UIF)
-        WRITE_REG(TIM3->SR, ~(TIM_SR_UIF));
+//    if (TIM3->SR & TIM_SR_UIF) {
+//        t3count1++;
+//        // Clear the update interrupt flag (UIF)
+//        WRITE_REG(TIM3->SR, ~(TIM_SR_UIF));
+//    }
+    if (TIM3->SR & TIM_SR_CC2IF) {
+        t3count2++;
+        // Clear the Capture/Compare 2 interrupt flag (CC2F)
+        WRITE_REG(TIM3->SR, ~(TIM_SR_CC2IF));
         samples[samplesCount++] = (uint16_t) GPIOE->IDR;
-        if (samplesCount >= (sizeof(samples) / sizeof(samples[0]))) {
+        if (samplesCount >= sizeof(samples)) {
             samplesCount = 0;
         }
     }
-//    if (TIM3->SR | TIM_SR_CC2IF) {
-//        t3count3++;
-//        // Clear the Capture/Compare 2 interrupt flag (CC2F)
-//        WRITE_REG(TIM3->SR, ~(TIM_SR_CC2IF));
-//    }
     GPIOD->BSRR = GPIO_BSRR_BR10;
 }
 
@@ -272,7 +274,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 199;
+  htim1.Init.Period = 1999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -297,7 +299,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 60;
+  sConfigOC.Pulse = 500;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
