@@ -41,10 +41,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-TIM_HandleTypeDef htim1;
+LPTIM_HandleTypeDef hlptim2;
 
 UART_HandleTypeDef huart1;
 
+DMA_HandleTypeDef hdma_bdma_generator0;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -52,8 +53,9 @@ UART_HandleTypeDef huart1;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_TIM1_Init(void);
+static void MX_BDMA_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_LPTIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -67,70 +69,6 @@ int count;
 // DMA-Memory: Global Array in SRAM1, 32byte-aligned
 uint16_t __ALIGNED(4)  SECTION_RAM_D2 samples[2048];
 uint16_t samplesCount = 0;
-
-void TIM3_Init() {
-    SET_BIT(RCC->AHB4ENR, RCC_AHB4ENR_GPIOAEN);
-    // setup PA7 for TIM3 CH2
-    // Very high speed PA7
-    MODIFY_REG(GPIOA->OSPEEDR, GPIO_OSPEEDR_OSPEED7_Msk, GPIO_OSPEEDR_OSPEED7_0|GPIO_OSPEEDR_OSPEED7_1);
-    // Set AF2 (TIM3 CH2) for PA7
-    MODIFY_REG(GPIOA->AFR[0], GPIO_AFRL_AFSEL7_Msk, GPIO_AFRL_AFSEL7_1);
-    // Select PA7 mode - AF (10)
-    MODIFY_REG(GPIOA->MODER, GPIO_MODER_MODE7_Msk, GPIO_MODER_MODE7_1);
-
-    // Initialize TIM3
-    RCC->APB1LENR |= RCC_APB1LENR_TIM3EN;
-//    TIM3-> |= ; // select clock source TIM3
-    // Set the Prescaler value
-    TIM3->PSC = 0;  // tim3Prescaler; // 200MHz /1 = 200mHz
-    // Set the Autoreload value
-    TIM3->ARR = 199; // tim3Period;  // 200MHz / 200 = 1Mz
-//    TIM3->DIER |= TIM_DIER_UIE; // interrupt on update
-    TIM3->DIER |= TIM_DIER_CC2IE; // interrupt on CC2
-    NVIC_EnableIRQ(TIM3_IRQn);
-//    NVIC_SetPriority(TIM3_IRQn, 0, 0);
-
-    // Configure the Channel 2 in PWM mode
-    // Disable the Channel 2: Reset the CC2E Bit
-    TIM3->CCER &= ~TIM_CCER_CC2E;
-    // Select the PWM mode 1 - 0110
-    TIM3->CCMR1 |= ((uint32_t) TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2M_2);
-    // Set the Capture Compare Register value
-    TIM3->CCR2 = 100; // tim3 CC2 Pulse
-    // Set the Preload enable for channel1
-    TIM3->CCMR1 |= TIM_CCMR1_OC2PE;
-    // Configure the Output Fast mode
-    TIM3->CCMR1 &= ~TIM_CCMR1_OC2FE;
-    // Enable the Capture compare channel
-    TIM3->CCER |= TIM_CCER_CC2E;
-    // Enable the main output
-//    TIM3->BDTR |= TIM_BDTR_MOE;
-    // Enable the Peripheral
-    TIM3->CR1 |= TIM_CR1_CEN;
-}
-
-uint32_t t3count1 = 0;
-uint32_t t3count2 = 0;
-
-void TIM3_IRQHandler(void) {
-    GPIOD->BSRR = GPIO_BSRR_BS10;
-
-//    if (TIM3->SR & TIM_SR_UIF) {
-//        t3count1++;
-//        // Clear the update interrupt flag (UIF)
-//        WRITE_REG(TIM3->SR, ~(TIM_SR_UIF));
-//    }
-    if (TIM3->SR & TIM_SR_CC2IF) {
-        t3count2++;
-        // Clear the Capture/Compare 2 interrupt flag (CC2F)
-        WRITE_REG(TIM3->SR, ~(TIM_SR_CC2IF));
-        samples[samplesCount++] = (uint16_t) GPIOE->IDR;
-        if (samplesCount >= sizeof(samples)) {
-            samplesCount = 0;
-        }
-    }
-    GPIOD->BSRR = GPIO_BSRR_BR10;
-}
 
 /* USER CODE END 0 */
 
@@ -171,13 +109,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_TIM1_Init();
+  MX_BDMA_Init();
   MX_USART1_UART_Init();
+  MX_LPTIM2_Init();
   /* USER CODE BEGIN 2 */
-  if (HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1)!= HAL_OK) {
-      Error_Handler();
-  }
-  TIM3_Init();
+
   mainInitialize();
   /* USER CODE END 2 */
 
@@ -260,82 +196,42 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief TIM1 Initialization Function
+  * @brief LPTIM2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM1_Init(void)
+static void MX_LPTIM2_Init(void)
 {
 
-  /* USER CODE BEGIN TIM1_Init 0 */
+  /* USER CODE BEGIN LPTIM2_Init 0 */
 
-  /* USER CODE END TIM1_Init 0 */
+  /* USER CODE END LPTIM2_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+  /* USER CODE BEGIN LPTIM2_Init 1 */
 
-  /* USER CODE BEGIN TIM1_Init 1 */
+  /* USER CODE END LPTIM2_Init 1 */
+  hlptim2.Instance = LPTIM2;
+  hlptim2.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
+  hlptim2.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV4;
+  hlptim2.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
+  hlptim2.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_LOW;
+  hlptim2.Init.UpdateMode = LPTIM_UPDATE_ENDOFPERIOD;
+  hlptim2.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
+  hlptim2.Init.Input1Source = LPTIM_INPUT1SOURCE_GPIO;
+  hlptim2.Init.Input2Source = LPTIM_INPUT2SOURCE_GPIO;
+  if (HAL_LPTIM_Init(&hlptim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN LPTIM2_Init 2 */
 
-  /* USER CODE END TIM1_Init 1 */
-  htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
-  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 1999;
-  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim1.Init.RepetitionCounter = 0;
-  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
-  {
-    Error_Handler();
+  uint32_t periodValue = 1000; // (2 * LSE_VALUE)/4;    // Calculate the Timer  Autoreload value for 2sec period
+  uint32_t pulseValue  = periodValue/2;        // Set the Timer  pulse value for 50% duty cycle
+  if (HAL_LPTIM_PWM_Start(&hlptim2, periodValue, pulseValue) != HAL_OK) {
+      Error_Handler();
   }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 500;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-  sBreakDeadTimeConfig.DeadTime = 0;
-  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-  sBreakDeadTimeConfig.BreakFilter = 0;
-  sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
-  sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
-  sBreakDeadTimeConfig.Break2Filter = 0;
-  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM1_Init 2 */
 
-  /* USER CODE END TIM1_Init 2 */
-  HAL_TIM_MspPostInit(&htim1);
+  /* USER CODE END LPTIM2_Init 2 */
 
 }
 
@@ -390,6 +286,46 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  * Configure DMA for memory to memory transfers
+  *   hdma_bdma_generator0
+  */
+static void MX_BDMA_Init(void)
+{
+
+  /* Local variables */
+  HAL_DMA_MuxRequestGeneratorConfigTypeDef pRequestGeneratorConfig = {0};
+
+  /* DMA controller clock enable */
+  __HAL_RCC_BDMA_CLK_ENABLE();
+
+  /* Configure DMA request hdma_bdma_generator0 on BDMA_Channel0 */
+  hdma_bdma_generator0.Instance = BDMA_Channel0;
+  hdma_bdma_generator0.Init.Request = BDMA_REQUEST_GENERATOR0;
+  hdma_bdma_generator0.Init.Direction = DMA_MEMORY_TO_PERIPH;
+  hdma_bdma_generator0.Init.PeriphInc = DMA_PINC_DISABLE;
+  hdma_bdma_generator0.Init.MemInc = DMA_MINC_ENABLE;
+  hdma_bdma_generator0.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+  hdma_bdma_generator0.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+  hdma_bdma_generator0.Init.Mode = DMA_NORMAL;
+  hdma_bdma_generator0.Init.Priority = DMA_PRIORITY_LOW;
+  if (HAL_DMA_Init(&hdma_bdma_generator0) != HAL_OK)
+  {
+    Error_Handler( );
+  }
+
+  /* Configure the DMAMUX request generator for the selected BDMA channel */
+  pRequestGeneratorConfig.SignalID = HAL_DMAMUX2_REQ_GEN_LPTIM2_OUT;
+  pRequestGeneratorConfig.Polarity = HAL_DMAMUX_REQ_GEN_RISING;
+  pRequestGeneratorConfig.RequestNumber = 1;
+  if (HAL_DMAEx_ConfigMuxRequestGenerator(&hdma_bdma_generator0, &pRequestGeneratorConfig) != HAL_OK)
+  {
+    Error_Handler( );
+  }
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -401,34 +337,13 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET);
+  __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED4_Pin|LED6_Pin|LED5_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
-                          |GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
-
-  /*Configure GPIO pins : PE2 PE3 PE4 PE5
-                           PE6 PE7 PE8 PE9
-                           PE10 PE11 PE12 PE13
-                           PE14 PE15 PE0 PE1 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5
-                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
-                          |GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
-                          |GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_0|GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BTN1_Pin */
   GPIO_InitStruct.Pin = BTN1_Pin;
@@ -436,28 +351,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(BTN1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
   /*Configure GPIO pins : LED4_Pin LED6_Pin LED5_Pin */
   GPIO_InitStruct.Pin = LED4_Pin|LED6_Pin|LED5_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PD10 PD11 PD12 PD13
-                           PD14 PD15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
-                          |GPIO_PIN_14|GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

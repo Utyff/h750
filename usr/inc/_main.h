@@ -28,8 +28,6 @@ typedef __IO uint32_t vu32;
 typedef __IO uint16_t vu16;
 typedef __IO uint8_t vu8;
 
-extern TIM_HandleTypeDef htim1;
-extern TIM_HandleTypeDef htim8;
 extern UART_HandleTypeDef huart1;
 
 void mainInitialize();
