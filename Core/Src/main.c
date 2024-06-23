@@ -69,6 +69,15 @@ int count;
 // DMA-Memory: Global Array in SRAM1, 32byte-aligned
 uint16_t __ALIGNED(4)  SECTION_RAM_D2 samples[2048];
 uint16_t samplesCount = 0;
+#define BUFLEN (32)
+uint16_t __attribute__((section (".RAM_D3"))) dmabuf[BUFLEN];
+
+__IO   uint32_t DMA_TransferErrorFlag = 0;
+
+static void HAL_TransferError(DMA_HandleTypeDef *hdma)
+{
+    DMA_TransferErrorFlag = 1;
+}
 
 /* USER CODE END 0 */
 
@@ -114,7 +123,31 @@ int main(void)
   MX_LPTIM2_Init();
   /* USER CODE BEGIN 2 */
 
+  for(int i=0; i<BUFLEN; i++) {
+      dmabuf[i] = i;
+  }
+
+  // DMA configure begin
+  // Register Error Callback
+  HAL_DMA_RegisterCallback(&hdma_bdma_generator0, HAL_DMA_XFER_ERROR_CB_ID, &HAL_TransferError);
+  // NVIC configuration for DMA transfer complete interrupt
+  HAL_NVIC_SetPriority(BDMA_Channel0_IRQn, 0, 1);
+  HAL_NVIC_EnableIRQ(BDMA_Channel0_IRQn);
+
+  // NVIC configuration for DMAMUX request generator overrun errors
+  HAL_NVIC_SetPriority(DMAMUX2_OVR_IRQn, 0, 1);
+  HAL_NVIC_EnableIRQ(DMAMUX2_OVR_IRQn);
+
+  HAL_DMAEx_EnableMuxRequestGenerator (&hdma_bdma_generator0);
+  // DMA configure end
+
   mainInitialize();
+
+  // ##-5- Start the DMA transfer ################################################
+  //  DMA source buffer is SRC_BUFFER_LED1_TOGGLE containing values to be written
+  //  to LED1 GPIO ODR register in order to turn LED1 On/Off each time comes a request from the DMAMUX request generator
+  HAL_DMA_Start_IT(&hdma_bdma_generator0, (uint32_t)dmabuf, (uint32_t)&GPIOE->ODR, BUFLEN);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -307,7 +340,7 @@ static void MX_BDMA_Init(void)
   hdma_bdma_generator0.Init.MemInc = DMA_MINC_ENABLE;
   hdma_bdma_generator0.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
   hdma_bdma_generator0.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-  hdma_bdma_generator0.Init.Mode = DMA_NORMAL;
+  hdma_bdma_generator0.Init.Mode = DMA_CIRCULAR;
   hdma_bdma_generator0.Init.Priority = DMA_PRIORITY_LOW;
   if (HAL_DMA_Init(&hdma_bdma_generator0) != HAL_OK)
   {
@@ -323,6 +356,14 @@ static void MX_BDMA_Init(void)
     Error_Handler( );
   }
 
+  /* DMA interrupt init */
+  /* DMAMUX2_OVR_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMAMUX2_OVR_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMAMUX2_OVR_IRQn);
+  /* BDMA_Channel0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(BDMA_Channel0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(BDMA_Channel0_IRQn);
+
 }
 
 /**
@@ -337,13 +378,33 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5
+                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
+                          |GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
+                          |GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED4_Pin|LED6_Pin|LED5_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : PE2 PE3 PE4 PE5
+                           PE6 PE7 PE8 PE9
+                           PE10 PE11 PE12 PE13
+                           PE14 PE15 PE0 PE1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5
+                          |GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
+                          |GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13
+                          |GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_0|GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BTN1_Pin */
   GPIO_InitStruct.Pin = BTN1_Pin;
