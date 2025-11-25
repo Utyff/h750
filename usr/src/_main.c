@@ -1,29 +1,59 @@
-#include <_main.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <_main.h>
 #include <delay.h>
+#include <draw.h>
+#include <keys.h>
+#include <DataBuffer.h>
+#include <generator.h>
+#include <adc.h>
 
 
 void CORECheck();
 
 void FPUCheck();
 
+extern int ii;
+extern float time;
 
 
 void mainInitialize() {
     DWT_Init();
+    LCD_Init();
 
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
+    //ADC_setParams();
+
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    //GEN_setParams();
+
+    HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
+    KEYS_init();
+    //initScreenBuf();
 
     CORECheck();
     FPUCheck();
 }
 
 void mainCycle() {
+    drawScreen();
+    KEYS_scan();
 
-    if ((random() & 0xf) < 3) GPIOB->ODR ^= LED4_Pin;
-    if ((random() & 0xf) < 3) GPIOB->ODR ^= LED5_Pin;
-    if ((random() & 0xf) < 3) GPIOB->ODR ^= LED6_Pin;
-//    if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
+    if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+#ifdef LED2_Pin
+    if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+#endif
+#ifdef LED3_Pin
+    if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+#endif
+
+    POINT_COLOR = WHITE;
+    BACK_COLOR = BLACK;
+    LCD_ShowxNum(0, 214, TIM8->CNT, 5, 12, 0x01);
+    LCD_ShowxNum(30, 214, (u32) button1Count, 5, 12, 0x01);
+    LCD_ShowxNum(60, 214, (u32) ii, 5, 12, 0x01);
+    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
+    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
     delay_ms(50);
 }
