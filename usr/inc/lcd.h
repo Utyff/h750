@@ -17,7 +17,7 @@
 typedef struct {
     u16 width;            //LCD width
     u16 height;            //LCD height
-    u16 id;                //LCD ID
+    vu16 id;                //LCD ID
     u8 dir;            // horizontal screen or vertical screen control: 0, vertical screen; 1, horizontal screen.
 } _lcd_dev;
 

@@ -86,8 +86,9 @@ void ADC_setParams() {
     hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
 //    hadc1.Init.BoostMode = ENABLE;
     hadc1.Init.OversamplingMode = DISABLE;
-    if (HAL_ADC_Init(&hadc1) != HAL_OK)
+    if (HAL_ADC_Init(&hadc1) != HAL_OK) {
         Error_Handler();
+    }
 
     /**Configure Regular Channel
     */

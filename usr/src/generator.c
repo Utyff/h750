@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <_main.h>
 #include "generator.h"
 

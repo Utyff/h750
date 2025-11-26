@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <_main.h>
 #include <keys.h>
 #include <adc.h>

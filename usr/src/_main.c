@@ -16,28 +16,29 @@ void FPUCheck();
 extern int ii;
 extern float time;
 
+static u16 color = 1;
 
 void mainInitialize() {
     DWT_Init();
     LCD_Init();
 
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
+//    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
     //ADC_setParams();
 
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+//    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     //GEN_setParams();
 
-    HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
-    KEYS_init();
+//    HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
+//    KEYS_init();
     //initScreenBuf();
 
-    CORECheck();
-    FPUCheck();
+//    CORECheck();
+//    FPUCheck();
 }
 
 void mainCycle() {
-    drawScreen();
-    KEYS_scan();
+//    drawScreen();
+//    KEYS_scan();
 
     if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
 #ifdef LED2_Pin
@@ -47,15 +48,30 @@ void mainCycle() {
     if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
 #endif
 
-    POINT_COLOR = WHITE;
-    BACK_COLOR = BLACK;
-    LCD_ShowxNum(0, 214, TIM8->CNT, 5, 12, 0x01);
-    LCD_ShowxNum(30, 214, (u32) button1Count, 5, 12, 0x01);
-    LCD_ShowxNum(60, 214, (u32) ii, 5, 12, 0x01);
-    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
-    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
+//    POINT_COLOR = WHITE;
+//    BACK_COLOR = BLACK;
+//    LCD_ShowxNum(0, 214, TIM8->CNT, 5, 12, 0x01);
+//    LCD_ShowxNum(30, 214, (u32) button1Count, 5, 12, 0x01);
+//    LCD_ShowxNum(60, 214, (u32) ii, 5, 12, 0x01);
+//    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
+//    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
-    delay_ms(50);
+    u32 t0 = DWT_Get_Current_Tick();
+    LCD_Clear(color);
+    u32 ticks = DWT_Elapsed_Tick(t0);
+    POINT_COLOR = YELLOW;
+    LCD_ShowxNum(130, 227, ticks / DWT_IN_MICROSEC, 8, 12, 9);
+//    t00 = t0;
+//    ticks0 = ticks;
+
+    color = color << 1;
+    if (color == 0) {
+        color = 1;
+    }
+    POINT_COLOR = BLACK;
+    LCD_ShowxNum(0, 214, color, 10, 12, 0x0);
+
+    delay_ms(300);
 }
 
 #ifdef DEBUG_TRACE_SWO

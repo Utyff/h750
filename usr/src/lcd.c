@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <lcd_fmc.h>
 #include <lcd.h>
 #include "font.h"
@@ -201,6 +202,8 @@ void LCD_Display_Dir(u8 dir) {
     LCD_Scan_Dir(DFT_SCAN_DIR);    // Default scan direction
 }
 
+vu16 lid=0x1234;
+
 // Initialize lcd
 // This initialization function can initialize the various ILI93XX LCD, but the other function is based ILI9320!!!
 // Not been tested on other types of driver chip!
@@ -221,6 +224,8 @@ void LCD_Init(void) {
         lcddev.id |= LCD_RD_DATA();   // Read 41
         if (lcddev.id != 0X9341) {   // 9341
             Error_Handler();
+        } else {
+            lid = lcddev.id;
         }
     } else {
         Error_Handler();
@@ -358,7 +363,7 @@ void LCD_Clear(u16 color) {
 //    return;
 
     // get start time
-    u32 t0 = DWT_Get_Current_Tick();
+//    u32 t0 = DWT_Get_Current_Tick();
 
     LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);  // set the cursor position
     LCD_WriteRAM_Prepare();                  // start writing GRAM
@@ -368,9 +373,9 @@ void LCD_Clear(u16 color) {
         LCD_WR_DATA(color);
     }
 
-    u32 LCDClearTick = DWT_Elapsed_Tick(t0);
-    POINT_COLOR = YELLOW;
-    LCD_ShowxNum(100, 227, LCDClearTick / DWT_IN_MICROSEC, 8, 12, 9);
+//    u32 LCDClearTick = DWT_Elapsed_Tick(t0);
+//    POINT_COLOR = YELLOW;
+//    LCD_ShowxNum(100, 227, LCDClearTick / DWT_IN_MICROSEC, 8, 12, 9);
 }
 
 // Fill a single color in the designated area
