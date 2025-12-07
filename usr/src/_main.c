@@ -75,7 +75,8 @@ void mainInitialize() {
     FT6x36(&hi2c1);
     tFunction();
 
-//    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
+    for(uint32_t i=0; i<BUF_SIZE*2; i++) samplesBuffer[i] = i;
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
     //ADC_setParams();
 
 //    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -92,19 +93,12 @@ void mainInitialize() {
 u32 ticks =0;
 
 void mainCycle() {
-//    drawScreen();
-//    KEYS_scan();
-
-    if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-#ifdef LED2_Pin
-    if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
-#endif
-#ifdef LED3_Pin
-    if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
-#endif
-
+    if ((random() & 7) < 2) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
     getPoint(0, &_p1);
     getPoint(1, &_p2);
+
+//    drawScreen();
+//    KEYS_scan();
 
 //    POINT_COLOR = WHITE;
 //    BACK_COLOR = BLACK;
@@ -123,7 +117,7 @@ void mainCycle() {
     POINT_COLOR = BLACK;
 //    LCD_ShowxNum(0,  294, color, 10, 12, 0x0);
 
-    delay_ms(300);
+    delay_ms(30);
 }
 
 #ifdef DEBUG_TRACE_SWO

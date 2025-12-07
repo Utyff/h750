@@ -9,6 +9,6 @@
 //__SECTION_RAM_D2 int16_t AdcValues_i16[2];
 
 //ALIGN_32BYTES (u8 samplesBuffer[BUF_SIZE]);
-u8 samplesBuffer[BUF_SIZE];
+_Alignas(32) u8 samplesBuffer[BUF_SIZE*2];
 
 u8 firstHalf = 0;
