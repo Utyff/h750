@@ -7,7 +7,9 @@
 #include <DataBuffer.h>
 #include <generator.h>
 #include <adc.h>
+#include "ft6x36.h"
 
+extern I2C_HandleTypeDef hi2c1;
 
 void CORECheck();
 
@@ -16,11 +18,62 @@ void FPUCheck();
 extern int ii;
 extern float time;
 
-static u16 color = 1;
+uint8_t tId;
+uint8_t tId2;
+uint8_t nrTouches;
+uint8_t gesture;
+uint8_t threshold;
+uint8_t periodActive;
+uint8_t periodMonitor;
+touch_point_t _p1;
+touch_point_t _p2;
+
+
+void tFunction()
+{
+    // reads chip ID
+    tId = readID();
+    tId2 = readID();
+
+    // returns number of touches
+    nrTouches = getNrTouches();
+
+    // read touch locations
+    getPoint(0, &_p1);
+    getPoint(1, &_p2);
+
+    // returns gesture data, but doesn't seem to be
+    // supported by chip and is always 0
+    gesture = getGesture();
+
+    // returns current threshold value
+    threshold = getThreshold();
+
+    // sets new threshold value
+//     setThreshold(128);
+
+    // turn active/monitor switching mode on/off
+//     setModeSwitching(0);
+
+    // set delay to switch to monitor mode after a touch
+//     setModeSwitchDelay(123); // arbitrary value
+
+    // gets sample period in active/monitor mode
+     periodActive = getPeriodActive();
+     periodMonitor = getPeriodMonitor();
+
+    // sets sample period in active/monitor mode
+//     setPeriodActive(10);
+//     setPeriodMonitor(30);
+}
 
 void mainInitialize() {
     DWT_Init();
     LCD_Init();
+    LCD_Clear(BLACK);
+
+    FT6x36(&hi2c1);
+    tFunction();
 
 //    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
     //ADC_setParams();
@@ -36,6 +89,8 @@ void mainInitialize() {
 //    FPUCheck();
 }
 
+u32 ticks =0;
+
 void mainCycle() {
 //    drawScreen();
 //    KEYS_scan();
@@ -48,6 +103,9 @@ void mainCycle() {
     if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
 #endif
 
+    getPoint(0, &_p1);
+    getPoint(1, &_p2);
+
 //    POINT_COLOR = WHITE;
 //    BACK_COLOR = BLACK;
 //    LCD_ShowxNum(0, 214, TIM8->CNT, 5, 12, 0x01);
@@ -57,19 +115,13 @@ void mainCycle() {
 //    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
     u32 t0 = DWT_Get_Current_Tick();
-    LCD_Clear(color);
-    u32 ticks = DWT_Elapsed_Tick(t0);
+    LCD_Clear(DARKBLUE);
+    ticks = DWT_Elapsed_Tick(t0);
     POINT_COLOR = YELLOW;
-    LCD_ShowxNum(130, 227, ticks / DWT_IN_MICROSEC, 8, 12, 9);
-//    t00 = t0;
-//    ticks0 = ticks;
+    LCD_ShowxNum(130, 307, ticks / DWT_IN_MICROSEC, 8, 12, 9);
 
-    color = color << 1;
-    if (color == 0) {
-        color = 1;
-    }
     POINT_COLOR = BLACK;
-    LCD_ShowxNum(0, 214, color, 10, 12, 0x0);
+//    LCD_ShowxNum(0,  294, color, 10, 12, 0x0);
 
     delay_ms(300);
 }
