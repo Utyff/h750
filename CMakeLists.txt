@@ -46,7 +46,6 @@ add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 #    add_compile_options(-Os)
 #else ()
     message(STATUS "Minimal optimization, debug info included")
-#    add_compile_options(-Og -g)
     add_compile_options(-Og -g)
 #endif ()
 

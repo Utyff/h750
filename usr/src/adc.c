@@ -65,6 +65,24 @@ uint32_t ADCElapsedTick;       // the last time buffer fill
  */
 void ADC_setParams() {
 
+//    /* ADC1 DMA Init */
+//    /* ADC1 Init */
+//    hdma_adc1.Instance = DMA1_Stream1;
+//    hdma_adc1.Init.Request = DMA_REQUEST_ADC1;
+//    hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
+//    hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
+//    hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
+//    hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+//    hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+//    hdma_adc1.Init.Mode = DMA_NORMAL;
+//    hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
+//    hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+//    if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
+//    {
+//        Error_Handler();
+//    }
+//    __HAL_LINKDMA(&hadc1,DMA_Handle,hdma_adc1);
+
     ADC_ChannelConfTypeDef sConfig;
 
     /**Common config
@@ -78,20 +96,17 @@ void ADC_setParams() {
     hadc1.Init.ContinuousConvMode = ENABLE;
     hadc1.Init.NbrOfConversion = 1;
     hadc1.Init.DiscontinuousConvMode = DISABLE;
-    hadc1.Init.NbrOfDiscConversion = 1;
     hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
     hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
     hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
     hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
-//    hadc1.Init.BoostMode = ENABLE;
     hadc1.Init.OversamplingMode = DISABLE;
+    hadc1.Init.Oversampling.Ratio = 1;
     if (HAL_ADC_Init(&hadc1) != HAL_OK) {
         Error_Handler();
     }
 
-    /**Configure Regular Channel
-    */
     /**Configure Regular Channel
     */
     sConfig.Channel = ADC_CHANNEL_3;
@@ -100,8 +115,11 @@ void ADC_setParams() {
     sConfig.SingleDiff = ADC_SINGLE_ENDED;
     sConfig.OffsetNumber = ADC_OFFSET_NONE;
     sConfig.Offset = 0;
+    sConfig.OffsetSignedSaturation = DISABLE;
     if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+    {
         Error_Handler();
+    }
 
     HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
 
@@ -117,10 +135,11 @@ uint32_t cpltCount =10;
   */
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
+    ADCHalfElapsedTick = DWT_Elapsed_Tick(ADCStartTick);
     halfCount++;
     firstHalf = 0;
     /* Invalidate Data Cache to get the updated content of the SRAM on the first half of the ADC converted data buffer: 32 bytes */
-    SCB_InvalidateDCache_by_Addr((uint32_t *) &samplesBuffer[0], BUF_SIZE);
+//    SCB_InvalidateDCache_by_Addr((uint32_t *) &samplesBuffer[0], BUF_SIZE);
 }
 
 /**
@@ -130,10 +149,11 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
   */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
+    ADCElapsedTick = DWT_Elapsed_Tick(ADCStartTick);
     cpltCount++;
-    firstHalf = 1;
+    adc1cplt = 1;
     /* Invalidate Data Cache to get the updated content of the SRAM on the second half of the ADC converted data buffer: 32 bytes */
-    SCB_InvalidateDCache_by_Addr((uint32_t *) &samplesBuffer[BUF_SIZE/2], BUF_SIZE);
+//    SCB_InvalidateDCache_by_Addr((uint32_t *) &samplesBuffer[BUF_SIZE/2], BUF_SIZE);
 }
 
 void ADC_step_up() {
