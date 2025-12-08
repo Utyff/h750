@@ -40,7 +40,7 @@ void mainInitialize();
 
 void mainCycle();
 
-#define DEBUG_TRACE_NONE
+#define DEBUG_TRACE_UART
 
 #if defined(DEBUG_TRACE_SWO)
 

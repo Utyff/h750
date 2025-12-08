@@ -65,9 +65,9 @@ void KEYS_scan() {
 
     // choose type of encoder action
     int8_t action = button1Count % (int8_t) 3;
-/*    if (action == 0) {
+    if (action == 0) {
         ADC_step(step);
-    } else if (action == 1) {
+    } /*else if (action == 1) {
         GEN_step(step);
     } else {
         DAC_NextGeneratorSignal();

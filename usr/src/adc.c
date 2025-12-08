@@ -49,7 +49,7 @@ const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
         {ADC_CLOCK_SYNC_PCLK_DIV8, ADC_SAMPLETIME_480CYCLES, 36.1481481f, 11567.40741f}
 }; //*/
 
-uint32_t ADC_Prescaler = ADC_CLOCK_ASYNC_DIV4;
+uint32_t ADC_Prescaler = ADC_CLOCK_ASYNC_DIV1;
 uint32_t ADC_SampleTime = ADC_SAMPLETIME_1CYCLE_5;
 
 uint16_t ScreenTime = 0;      // index in ScreenTimes
@@ -63,25 +63,9 @@ uint32_t ADCElapsedTick;       // the last time buffer fill
 /**
  * Copy of MX_ADC1_Init()
  */
-void ADC_setParams() {
+void ADC_start() {
 
-//    /* ADC1 DMA Init */
-//    /* ADC1 Init */
-//    hdma_adc1.Instance = DMA1_Stream1;
-//    hdma_adc1.Init.Request = DMA_REQUEST_ADC1;
-//    hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
-//    hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
-//    hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
-//    hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-//    hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-//    hdma_adc1.Init.Mode = DMA_NORMAL;
-//    hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
-//    hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-//    if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
-//    {
-//        Error_Handler();
-//    }
-//    __HAL_LINKDMA(&hadc1,DMA_Handle,hdma_adc1);
+    HAL_ADC_Stop_DMA(&hadc1);
 
     ADC_ChannelConfTypeDef sConfig;
 
@@ -116,8 +100,7 @@ void ADC_setParams() {
     sConfig.OffsetNumber = ADC_OFFSET_NONE;
     sConfig.Offset = 0;
     sConfig.OffsetSignedSaturation = DISABLE;
-    if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-    {
+    if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
         Error_Handler();
     }
 
@@ -127,7 +110,7 @@ void ADC_setParams() {
 }
 
 uint32_t halfCount =0;
-uint32_t cpltCount =10;
+uint32_t cpltCount =0;
 /**
   * @brief  Conversion complete callback in non-blocking mode
   * @param  hadc: ADC handle
@@ -182,10 +165,19 @@ float ADC_getTime() {
 
 s16 sStep;
 float time;
-int ii;
+int ii = 0;
 
 void ADC_step(int16_t step) {
-/*    if (step == 0) return;
+    if (step == 0) return;
+    if (step > 0) {
+        if (++ii > 2) ii = 2;
+    } else {
+        if (--ii < 0) ii = 0;
+    }
+    ADC_Prescaler = ADC_Parameters[ii].ADC_Prescaler;
+    ADC_SampleTime = ADC_Parameters[ii].ADC_SampleTime;
+    return;
+
     if (step > 0) ADC_step_up();
     else ADC_step_down();
     sStep = step;
@@ -207,7 +199,7 @@ void ADC_step(int16_t step) {
     // set X scale
     scaleX = ADC_Parameters[i].ScreenTime / time;
 //*/
-    ADC_setParams();
+//    ADC_start();
 }
 
 /*uint16_t ICount = 0;

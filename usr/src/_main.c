@@ -29,20 +29,19 @@ void mainInitialize() {
 
     FT6x36(&hi2c1);
 
-    for(uint32_t i=0; i<BUF_SIZE*2; i++) samplesBuffer[i] = i;
     adc1cplt = 0;
 //    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
-    ADC_setParams();
+    ADC_start();
 
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
     //GEN_setParams();
 
     HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
-//    KEYS_init();
+    KEYS_init();
     //initScreenBuf();
 
-//    CORECheck();
-//    FPUCheck();
+    CORECheck();
+    FPUCheck();
 }
 
 u32 ticks =0;
@@ -59,7 +58,7 @@ void mainCycle() {
     LCD_ShowxNum(130, 307, ticks / DWT_IN_MICROSEC, 8, 12, 9);
 
 //    drawScreen();
-//    KEYS_scan();
+    KEYS_scan();
 
     POINT_COLOR = WHITE;
     BACK_COLOR = DARKBLUE;
@@ -74,8 +73,7 @@ void mainCycle() {
 
     if (adc1cplt != 0) {
         adc1cplt = 0;
-        HAL_ADC_Stop_DMA(&hadc1);
-        ADC_setParams();
+        ADC_start();
     }
 
     delay_ms(30);
