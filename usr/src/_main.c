@@ -23,6 +23,9 @@ touch_point_t _p2;
 
 
 void mainInitialize() {
+    CORECheck();
+    FPUCheck();
+
     DWT_Init();
     LCD_Init();
     LCD_Clear(BLACK);
@@ -39,9 +42,6 @@ void mainInitialize() {
     HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
     KEYS_init();
     //initScreenBuf();
-
-    CORECheck();
-    FPUCheck();
 }
 
 u32 ticks =0;
@@ -68,7 +68,7 @@ void mainCycle() {
 //    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
 //    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
-    POINT_COLOR = BLACK;
+    POINT_COLOR = MAGENTA;
     LCD_ShowxNum(0,  294, ADCElapsedTick, 10, 12, 0x0);
 
     if (adc1cplt != 0) {
@@ -112,7 +112,7 @@ void FPUCheck(void) {
             sprintf(buf, "FPU-D Single-precision and Double-precision\n");
             break;
         default :
-            sprintf(buf, "Unknown FPU");
+            sprintf(buf, "Unknown FPU\n");
     }
     DBG_Trace(buf);
 }
@@ -151,9 +151,9 @@ void CORECheck(void) {
                 break;
 
             default :
-                sprintf(buf, "Unknown CORE");
+                sprintf(buf, "Unknown CORE\n");
         }
     } else
-        sprintf(buf, "Unknown CORE IMPLEMENTER");
+        sprintf(buf, "Unknown CORE IMPLEMENTER\n");
     DBG_Trace(buf);
 }
