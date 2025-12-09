@@ -25,20 +25,20 @@ typedef struct GEN_param GEN_PARAM;
 
 #define GEN_Parameters_Size 6
 const GEN_PARAM GEN_Parameters[GEN_Parameters_Size] = {
-        {107, 19,  100000},
-        {107, 24,  80000},
-        {99,  35,  60000},
-        {107, 49,  40000},
-        {107, 99,  20000},
-        {107, 199, 10000}
+        {99, 19,  100000},
+        {99, 24,  80000},
+        {32, 100, 60000},
+        {99, 49,  40000},
+        {99, 99,  20000},
+        {99, 199, 10000}
 };
 
 int currentGenParam = 4;
 int currentGenScale = 1;
 
-uint32_t tim1Prescaler = 107;
+uint32_t tim1Prescaler = 99;
 uint32_t tim1Period = 99;
-uint32_t tim1Pulse = 30;
+uint32_t tim1Pulse = 40;
 
 void GEN_step(int16_t step) {
     char msg[200];
@@ -69,8 +69,8 @@ void GEN_step(int16_t step) {
     }
 
     tim1Prescaler = GEN_Parameters[currentGenParam].TIM_Prescaler;
-    tim1Period = GEN_Parameters[currentGenParam].TIM_Period * currentGenScale;
-    tim1Pulse = tim1Period * 30 / 100;
+    tim1Period = ((GEN_Parameters[currentGenParam].TIM_Period+1) * currentGenScale) -1;
+    tim1Pulse = tim1Period * 40 / 100;
     GEN_setParams();
 
     sprintf(msg, "After step. param: %u, scale: %u, presc: %u, period: %u\n", currentGenParam, currentGenScale, tim1Prescaler, tim1Period);
@@ -94,7 +94,7 @@ void GEN_setParams() {
     htim1.Init.Period = tim1Period;
     htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim1.Init.RepetitionCounter = 0;
-    htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+    htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
         Error_Handler();
 
