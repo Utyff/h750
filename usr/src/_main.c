@@ -18,17 +18,25 @@ void FPUCheck();
 extern int ii;
 extern float time;
 
-touch_point_t _p1;
-touch_point_t _p2;
+const char buildDate[] = __DATE__;
+const char buildTime[] = __TIME__;
+
+touch_point_t touchPoint1;
+touch_point_t touchPoint2;
 
 
 void mainInitialize() {
+    char buf[120];
+    sprintf(buf, "\n\nBuild: %s %s\n", buildDate, buildTime);
+    DBG_Trace(buf);
+
     CORECheck();
     FPUCheck();
 
     DWT_Init();
     LCD_Init();
     LCD_Clear(BLACK);
+    KEYS_init();
 
     FT6x36(&hi2c1);
 
@@ -40,15 +48,14 @@ void mainInitialize() {
     //GEN_setParams();
 
     HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
-    KEYS_init();
 }
 
 u32 ticks =0;
 
 void mainCycle() {
     if ((random() & 7) < 2) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-    getPoint(0, &_p1);
-    getPoint(1, &_p2);
+    getPoint(0, &touchPoint1);
+    getPoint(1, &touchPoint2);
 
 //    u32 t0 = DWT_Get_Current_Tick();
 //    LCD_Clear(CLR_BACKGROUND);
@@ -121,7 +128,7 @@ void CORECheck(void) {
     uint32_t cpuid = SCB->CPUID;
     uint32_t var, pat;
 
-    sprintf(buf, "\n\nCPUID %08X DEVID %03X DEVREV %03X\n", cpuid, DBGMCU->IDCODE & 0xFFF, DBGMCU->IDCODE >> 16);
+    sprintf(buf, "\nCPUID %08X DEVID %03X DEVREV %03X\n", cpuid, DBGMCU->IDCODE & 0xFFF, DBGMCU->IDCODE >> 16);
     DBG_Trace(buf);
 
     pat = (cpuid & 0x0000000F);

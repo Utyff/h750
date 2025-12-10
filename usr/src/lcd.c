@@ -155,7 +155,7 @@ void LCD_Init(void) {
 //        }
 
     char buf[250];
-    sprintf(buf, "\n LCD ID: %x\n", lid);
+    sprintf(buf, "\nLCD ID: %x\n", lid);
     DBG_Trace((uint8_t *) buf);
 
     LCD_Init_sequence();
