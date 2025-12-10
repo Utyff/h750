@@ -41,7 +41,6 @@ void mainInitialize() {
 
     HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
     KEYS_init();
-    //initScreenBuf();
 }
 
 u32 ticks =0;
@@ -51,25 +50,25 @@ void mainCycle() {
     getPoint(0, &_p1);
     getPoint(1, &_p2);
 
-    u32 t0 = DWT_Get_Current_Tick();
-    LCD_Clear(DARKBLUE);
-    ticks = DWT_Elapsed_Tick(t0);
-    POINT_COLOR = YELLOW;
-    LCD_ShowxNum(130, 307, ticks / DWT_IN_MICROSEC, 8, 12, 9);
+//    u32 t0 = DWT_Get_Current_Tick();
+//    LCD_Clear(CLR_BACKGROUND);
+//    ticks = DWT_Elapsed_Tick(t0);
+//    POINT_COLOR = YELLOW;
+//    LCD_ShowxNum(130, LINE1_Y, ticks / DWT_IN_MICROSEC, 8, 12, 9);
 
-//    drawScreen();
+    drawScreen();
     KEYS_scan();
 
     POINT_COLOR = WHITE;
-    BACK_COLOR = DARKBLUE;
-    LCD_ShowxNum(0, 307, TIM8->CNT, 5, 12, 0x01);
-    LCD_ShowxNum(30, 307, (u32) button1Count, 5, 12, 0x01);
+    BACK_COLOR = CLR_BACKGROUND;
+    LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
+    LCD_ShowxNum(30, LINE1_Y, (u32) button1Count, 5, 12, 0x0);
 //    LCD_ShowxNum(60, 214, (u32) ii, 5, 12, 0x01);
 //    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
 //    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
     POINT_COLOR = MAGENTA;
-    LCD_ShowxNum(0,  294, ADCElapsedTick, 10, 12, 0x0);
+    LCD_ShowxNum(0,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
 
     if (adc1cplt != 0) {
         adc1cplt = 0;
