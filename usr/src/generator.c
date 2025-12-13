@@ -68,9 +68,15 @@ void GEN_step(int16_t step) {
         }
     }
 
-    tim1Prescaler = GEN_Parameters[currentGenParam].TIM_Prescaler;
-    tim1Period = ((GEN_Parameters[currentGenParam].TIM_Period+1) * currentGenScale) -1;
-    tim1Pulse = tim1Period * 40 / 100;
+    if(currentGenScale==1) {
+        tim1Prescaler = ((GEN_Parameters[currentGenParam].TIM_Prescaler + 1) / 10) - 1;
+        tim1Period = GEN_Parameters[currentGenParam].TIM_Period;
+        tim1Pulse = tim1Period * 40 / 100;
+    } else {
+        tim1Prescaler = GEN_Parameters[currentGenParam].TIM_Prescaler;
+        tim1Period = ((GEN_Parameters[currentGenParam].TIM_Period + 1) * currentGenScale/10) - 1;
+        tim1Pulse = tim1Period * 40 / 100;
+    }
     GEN_setParams();
 
     sprintf(msg, "After step. param: %u, scale: %u, presc: %u, period: %u\n", currentGenParam, currentGenScale, tim1Prescaler, tim1Period);
