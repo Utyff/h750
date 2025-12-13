@@ -9,7 +9,7 @@
 #include <adc.h>
 #include "ft6x36.h"
 
-extern I2C_HandleTypeDef hi2c1;
+//extern I2C_HandleTypeDef hi2c1;
 
 void CORECheck();
 
@@ -21,8 +21,8 @@ extern float time;
 const char buildDate[] = __DATE__;
 const char buildTime[] = __TIME__;
 
-touch_point_t touchPoint1;
-touch_point_t touchPoint2;
+//touch_point_t touchPoint1;
+//touch_point_t touchPoint2;
 
 
 void mainInitialize() {
@@ -38,10 +38,11 @@ void mainInitialize() {
     LCD_Clear(BLACK);
     KEYS_init();
 
-    FT6x36(&hi2c1);
+//    FT6x36(&hi2c1);
 
     adc1cplt = 0;
 //    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
+//    HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE/2);
     ADC_start();
 
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
@@ -54,8 +55,8 @@ u32 ticks =0;
 
 void mainCycle() {
     if ((random() & 7) < 2) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-    getPoint(0, &touchPoint1);
-    getPoint(1, &touchPoint2);
+//    getPoint(0, &touchPoint1);
+//    getPoint(1, &touchPoint2);
 
 //    u32 t0 = DWT_Get_Current_Tick();
 //    LCD_Clear(CLR_BACKGROUND);

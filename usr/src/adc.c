@@ -13,6 +13,8 @@ struct ADC_param {
 };
 typedef struct ADC_param ADC_PARAM;
 
+static void ADC1_Init(void);
+static void ADC2_Init(void);
 
 #define ADC_Parameters_Size  31
 const ADC_PARAM ADC_Parameters[ADC_Parameters_Size] = {
@@ -63,49 +65,23 @@ uint32_t ADCElapsedTick;       // the last time buffer fill
 /**
  * Copy of MX_ADC1_Init()
  */
+HAL_StatusTypeDef adc_err=0;
 void ADC_start() {
 
-    HAL_ADC_Stop_DMA(&hadc1);
-
-    ADC_ChannelConfTypeDef sConfig;
-
-    /**Common config
-    */
-    hadc1.Instance = ADC1;
-    hadc1.Init.ClockPrescaler = ADC_Prescaler;
-    hadc1.Init.Resolution = ADC_RESOLUTION_8B;
-    hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
-    hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-    hadc1.Init.LowPowerAutoWait = DISABLE;
-    hadc1.Init.ContinuousConvMode = ENABLE;
-    hadc1.Init.NbrOfConversion = 1;
-    hadc1.Init.DiscontinuousConvMode = DISABLE;
-    hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-    hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-    hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
-    hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
-    hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
-    hadc1.Init.OversamplingMode = DISABLE;
-    hadc1.Init.Oversampling.Ratio = 1;
-    if (HAL_ADC_Init(&hadc1) != HAL_OK) {
-        Error_Handler();
+    if (hadc1.State != HAL_ADC_STATE_READY) {
+        HAL_ADCEx_MultiModeStop_DMA(&hadc1);
+//      HAL_ADC_Stop_DMA(&hadc1);
+        hadc1.State = HAL_ADC_STATE_READY;
     }
 
-    /**Configure Regular Channel
-    */
-    sConfig.Channel = ADC_CHANNEL_3;
-    sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SampleTime;
-    sConfig.SingleDiff = ADC_SINGLE_ENDED;
-    sConfig.OffsetNumber = ADC_OFFSET_NONE;
-    sConfig.Offset = 0;
-    sConfig.OffsetSignedSaturation = DISABLE;
-    if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+    ADC1_Init();
+    ADC2_Init();
+
+//  adc_err = HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
+    adc_err = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE / 2);
+    if(adc_err != HAL_OK) {
         Error_Handler();
     }
-
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
-
     ADCStartTick = DWT_Get_Current_Tick();
 }
 
@@ -136,6 +112,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
     adc1cplt = 1;
     /* Invalidate Data Cache to get the updated content of the SRAM on the second half of the ADC converted data buffer: 32 bytes */
 //    SCB_InvalidateDCache_by_Addr((uint32_t *) &samplesBuffer[BUF_SIZE/2], BUF_SIZE);
+}
+
+void HAL_ADC_ErrorCallback(ADC_HandleTypeDef *hadc) {
+    Error_Handler();
 }
 
 void ADC_step_up() {
@@ -227,3 +207,109 @@ void DMA2_Stream0_IRQHandler() {
         half = 1;
     }
 } //*/
+
+/**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void ADC1_Init(void) {
+
+//    if (HAL_ADC_DeInit(&hadc1) != HAL_OK)  {
+//        Error_Handler();
+//    }
+
+    ADC_MultiModeTypeDef multimode = {0};
+    ADC_ChannelConfTypeDef sConfig = {0};
+
+    /** Common config
+    */
+    hadc1.Instance = ADC1;
+    hadc1.Init.ClockPrescaler = ADC_Prescaler;
+    hadc1.Init.Resolution = ADC_RESOLUTION_8B;
+    hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+    hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+    hadc1.Init.LowPowerAutoWait = DISABLE;
+    hadc1.Init.ContinuousConvMode = ENABLE;
+    hadc1.Init.NbrOfConversion = 1;
+    hadc1.Init.DiscontinuousConvMode = DISABLE;
+    hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+    hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+    hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
+    hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
+    hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
+    hadc1.Init.OversamplingMode = DISABLE;
+    hadc1.Init.Oversampling.Ratio = 1;
+    if (HAL_ADC_Init(&hadc1) != HAL_OK) {
+        Error_Handler();
+    }
+
+    /** Configure the ADC multi-mode
+    */
+    multimode.Mode = ADC_DUALMODE_INTERL;
+    multimode.DualModeData = ADC_DUALMODEDATAFORMAT_8_BITS;
+    multimode.TwoSamplingDelay = ADC_TWOSAMPLINGDELAY_2CYCLES;
+    if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK) {
+        Error_Handler();
+    }
+
+    /** Configure Regular Channel
+    */
+    sConfig.Channel = ADC_CHANNEL_3;
+    sConfig.Rank = ADC_REGULAR_RANK_1;
+    sConfig.SamplingTime = ADC_SampleTime;
+    sConfig.SingleDiff = ADC_SINGLE_ENDED;
+    sConfig.OffsetNumber = ADC_OFFSET_NONE;
+    sConfig.Offset = 0;
+    sConfig.OffsetSignedSaturation = DISABLE;
+    if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+        Error_Handler();
+    }
+}
+
+/**
+  * @brief ADC2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void ADC2_Init(void) {
+
+//    if (HAL_ADC_DeInit(&hadc2) != HAL_OK)  {
+//        Error_Handler();
+//    }
+
+    ADC_ChannelConfTypeDef sConfig = {0};
+
+    /** Common config
+    */
+    hadc2.Instance = ADC2;
+    hadc2.Init.ClockPrescaler = ADC_Prescaler;
+    hadc2.Init.Resolution = ADC_RESOLUTION_8B;
+    hadc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
+    hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+    hadc2.Init.LowPowerAutoWait = DISABLE;
+    hadc2.Init.ContinuousConvMode = ENABLE;
+    hadc2.Init.NbrOfConversion = 1;
+    hadc2.Init.DiscontinuousConvMode = DISABLE;
+    hadc2.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DR;
+    hadc2.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
+    hadc2.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
+    hadc2.Init.OversamplingMode = DISABLE;
+    hadc2.Init.Oversampling.Ratio = 1;
+    if (HAL_ADC_Init(&hadc2) != HAL_OK) {
+        Error_Handler();
+    }
+
+    /** Configure Regular Channel
+    */
+    sConfig.Channel = ADC_CHANNEL_3;
+    sConfig.Rank = ADC_REGULAR_RANK_1;
+    sConfig.SamplingTime = ADC_SampleTime;
+    sConfig.SingleDiff = ADC_SINGLE_ENDED;
+    sConfig.OffsetNumber = ADC_OFFSET_NONE;
+    sConfig.Offset = 0;
+    sConfig.OffsetSignedSaturation = DISABLE;
+    if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK) {
+        Error_Handler();
+    }
+}
