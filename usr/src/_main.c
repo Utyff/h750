@@ -41,12 +41,9 @@ void mainInitialize() {
 //    FT6x36(&hi2c1);
 
     adc1cplt = 0;
-//    HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
-//    HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE/2);
     ADC_start();
 
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    //GEN_setParams();
+    GEN_setParams();
 
     HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
 }
@@ -57,12 +54,6 @@ void mainCycle() {
     if ((random() & 7) < 2) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
 //    getPoint(0, &touchPoint1);
 //    getPoint(1, &touchPoint2);
-
-//    u32 t0 = DWT_Get_Current_Tick();
-//    LCD_Clear(CLR_BACKGROUND);
-//    ticks = DWT_Elapsed_Tick(t0);
-//    POINT_COLOR = YELLOW;
-//    LCD_ShowxNum(130, LINE1_Y, ticks / DWT_IN_MICROSEC, 8, 12, 9);
 
     drawScreen();
     KEYS_scan();

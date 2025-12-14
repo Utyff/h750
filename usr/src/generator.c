@@ -19,7 +19,7 @@
 struct GEN_param {
     uint32_t TIM_Prescaler;
     uint32_t TIM_Period;
-    int Frequency;    // Hz
+    uint32_t Frequency;    // Hz
 };
 typedef struct GEN_param GEN_PARAM;
 
@@ -68,6 +68,17 @@ void GEN_step(int16_t step) {
         }
     }
 
+    GEN_setParams();
+
+    sprintf(msg, "After step. param: %u, scale: %u, presc: %u, period: %u\n", currentGenParam, currentGenScale, tim1Prescaler, tim1Period);
+    DBG_Trace(msg);
+}
+
+/**
+ *  made from MX_TIM1_Init()
+ *
+ */
+void GEN_setParams() {
     if(currentGenScale==1) {
         tim1Prescaler = ((GEN_Parameters[currentGenParam].TIM_Prescaler + 1) / 10) - 1;
         tim1Period = GEN_Parameters[currentGenParam].TIM_Period;
@@ -77,21 +88,7 @@ void GEN_step(int16_t step) {
         tim1Period = ((GEN_Parameters[currentGenParam].TIM_Period + 1) * currentGenScale/10) - 1;
         tim1Pulse = tim1Period * 40 / 100;
     }
-    GEN_setParams();
 
-    sprintf(msg, "After step. param: %u, scale: %u, presc: %u, period: %u\n", currentGenParam, currentGenScale, tim1Prescaler, tim1Period);
-    DBG_Trace(msg);
-}
-
-void GEN_setFreq() {
-    GEN_setParams();
-}
-
-/**
- *  made from MX_TIM1_Init()
- *
- */
-void GEN_setParams() {
     TIM_OC_InitTypeDef sConfigOC;
 
     htim1.Instance = TIM1;
