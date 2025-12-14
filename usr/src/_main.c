@@ -7,6 +7,7 @@
 #include <DataBuffer.h>
 #include <generator.h>
 #include <adc.h>
+#include <dac.h>
 #include "ft6x36.h"
 
 //extern I2C_HandleTypeDef hi2c1;
@@ -44,6 +45,7 @@ void mainInitialize() {
     ADC_start();
 
     GEN_setParams();
+    DAC_startSin();
 
     HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
 }
