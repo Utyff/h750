@@ -105,6 +105,9 @@ void FPUCheck(void) {
     mvfr0 = *(volatile uint32_t *) 0xE000EF40;
 
     switch (mvfr0) {
+        case 0x00000000 :
+            sprintf(buf, "No FPU\n");
+            break;
         case 0x10110021 :
             sprintf(buf, "FPU-S Single-precision only\n");
             break;
@@ -122,7 +125,7 @@ void CORECheck(void) {
     uint32_t cpuid = SCB->CPUID;
     uint32_t var, pat;
 
-    sprintf(buf, "\nCPUID %08X DEVID %03X DEVREV %03X\n", cpuid, DBGMCU->IDCODE & 0xFFF, DBGMCU->IDCODE >> 16);
+    sprintf(buf, "\nCPUID %08X DEVID %03X REVID %04X\n", cpuid, DBGMCU->IDCODE & 0xFFF, DBGMCU->IDCODE >> 16);
     DBG_Trace(buf);
 
     pat = (cpuid & 0x0000000F);
@@ -148,6 +151,9 @@ void CORECheck(void) {
                 break;
             case 0xC27 :
                 sprintf(buf, "Cortex M7 r%dp%d\n", var, pat);
+                break;
+            case 0xD21 :
+                sprintf(buf, "Cortex M33 r%dp%d\n", var, pat);
                 break;
 
             default :

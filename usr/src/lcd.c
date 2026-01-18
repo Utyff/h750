@@ -278,7 +278,7 @@ void LCD_Clear(u16 color) {
 
 //    u32 LCDClearTick = DWT_Elapsed_Tick(t0);
 //    POINT_COLOR = YELLOW;
-//    LCD_ShowxNum(100, 227, LCDClearTick / DWT_IN_MICROSEC, 8, 12, 9);
+//    LCD_ShowxNum(100, MAX_Y-13, LCDClearTick / DWT_IN_MICROSEC, 8, 12, 9);
 }
 
 // Fill a single color in the designated area

@@ -79,7 +79,7 @@ void ADC_start() {
 
 //  adc_err = HAL_ADC_Start_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE);
     adc_err = HAL_ADCEx_MultiModeStart_DMA(&hadc1, (uint32_t *) samplesBuffer, BUF_SIZE / 2);
-    if(adc_err != HAL_OK) {
+    if (adc_err != HAL_OK) {
         Error_Handler();
     }
     ADCStartTick = DWT_Get_Current_Tick();
