@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2023 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -59,12 +59,18 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BTN1_Pin GPIO_PIN_13
 #define BTN1_GPIO_Port GPIOC
-#define LED4_Pin GPIO_PIN_0
-#define LED4_GPIO_Port GPIOB
-#define LED6_Pin GPIO_PIN_14
-#define LED6_GPIO_Port GPIOB
-#define LED5_Pin GPIO_PIN_7
-#define LED5_GPIO_Port GPIOB
+#define LED1_Pin GPIO_PIN_0
+#define LED1_GPIO_Port GPIOB
+#define LED3_Pin GPIO_PIN_14
+#define LED3_GPIO_Port GPIOB
+#define TFT_DC_Pin GPIO_PIN_4
+#define TFT_DC_GPIO_Port GPIOB
+#define TFT_RST_Pin GPIO_PIN_5
+#define TFT_RST_GPIO_Port GPIOB
+#define TFT_CS_Pin GPIO_PIN_6
+#define TFT_CS_GPIO_Port GPIOB
+#define LED2_Pin GPIO_PIN_7
+#define LED2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

@@ -1,17 +1,28 @@
 #include <_main.h>
 #include <stdlib.h>
 #include <delay.h>
+#include "ili9488.h"
 
 
 void CORECheck();
 
 void FPUCheck();
 
+void ili9488_Fill() {
+    fillScreen(ILI9488_NAVY);
+
+    testLines(ILI9488_CYAN);
+
+    fillScreen(ILI9488_DARKCYAN);
+    ILI9488_printText("123456 qwert ASDFG", 40, 100, ILI9488_BLUE,ILI9488_DARKGREY, 1);
+}
 
 
 void mainInitialize() {
     DWT_Init();
 
+    ILI9488_Init();
+    ili9488_Fill();
 
     CORECheck();
     FPUCheck();
@@ -19,9 +30,9 @@ void mainInitialize() {
 
 void mainCycle() {
 
-    if ((random() & 0xf) < 3) GPIOB->ODR ^= LED4_Pin;
-    if ((random() & 0xf) < 3) GPIOB->ODR ^= LED5_Pin;
-    if ((random() & 0xf) < 3) GPIOB->ODR ^= LED6_Pin;
+    if ((random() & 0xf) < 3) GPIOB->ODR ^= LED1_Pin;
+    if ((random() & 0xf) < 3) GPIOB->ODR ^= LED2_Pin;
+    if ((random() & 0xf) < 3) GPIOB->ODR ^= LED3_Pin;
 //    if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
 
     delay_ms(50);

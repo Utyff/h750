@@ -2,4 +2,7 @@ cmake-build-debug/
 .idea/*
 *.tmp
 *.log
-*.user
+.cproject
+.mxproject
+.project
+*.jdebug.user

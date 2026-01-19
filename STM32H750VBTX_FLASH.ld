@@ -21,7 +21,7 @@
 *****************************************************************************
 ** @attention
 **
-** Copyright (c) 2022 STMicroelectronics.
+** Copyright (c) 2025 STMicroelectronics.
 ** All rights reserved.
 **
 ** This software is licensed under terms that can be found in the LICENSE file
@@ -88,21 +88,25 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
-  .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
-  .ARM : {
+  .ARM.extab (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  {
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+  } >FLASH
+  .ARM (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+  {
     __exidx_start = .;
     *(.ARM.exidx*)
     __exidx_end = .;
   } >FLASH
 
-  .preinit_array     :
+  .preinit_array (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     PROVIDE_HIDDEN (__preinit_array_start = .);
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
   } >FLASH
 
-  .init_array :
+  .init_array (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     PROVIDE_HIDDEN (__init_array_start = .);
     KEEP (*(SORT(.init_array.*)))
@@ -110,7 +114,7 @@ SECTIONS
     PROVIDE_HIDDEN (__init_array_end = .);
   } >FLASH
 
-  .fini_array :
+  .fini_array (READONLY) : /* The READONLY keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
     KEEP (*(SORT(.fini_array.*)))
@@ -162,36 +166,6 @@ SECTIONS
     . = ALIGN(8);
   } >RAM_D1
 
-  /* used by the startup to initialize data */
-/*  _siRAM_D2 = LOADADDR(.RAM_D2);*/
-
-  /* Initialized data sections goes into RAM_D2, load LMA copy after code */
-  .RAM_D2 :
-  {
-    . = ALIGN(4);
-    _sRAM_D2 = .;        /* create a global symbol at data start */
-    *(.RAM_D2)           /* .data sections */
-    *(.RAM_D2*)          /* .data* sections */
-
-    . = ALIGN(4);
-    _eRAM_D2 = .;        /* define a global symbol at data end */
-  } >RAM_D2 AT> FLASH
-
-  /* used by the startup to initialize data */
-/*  _siRAM_D3 = LOADADDR(.RAM_D3);*/
-
-  /* Initialized data sections goes into RAM_D3, load LMA copy after code */
-  .RAM_D3 :
-  {
-    . = ALIGN(4);
-    _sRAM_D3 = .;        /* create a global symbol at data start */
-    *(.RAM_D3)           /* .data sections */
-    *(.RAM_D3*)          /* .data* sections */
-
-    . = ALIGN(4);
-    _eRAM_D3 = .;        /* define a global symbol at data end */
-  } >RAM_D3 AT> FLASH
-
   /* Remove information from the standard libraries */
   /DISCARD/ :
   {
@@ -202,3 +176,5 @@ SECTIONS
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
 }
+
+
