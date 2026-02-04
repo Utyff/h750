@@ -11,10 +11,9 @@ void FPUCheck();
 void ili9488_Fill() {
     fillScreen(ILI9488_NAVY);
 
-    testLines(ILI9488_CYAN);
-
-    fillScreen(ILI9488_DARKCYAN);
-    ILI9488_printText("123456 qwert ASDFG", 40, 100, ILI9488_BLUE,ILI9488_DARKGREY, 1);
+    // testLines(ILI9488_CYAN);
+    // fillScreen(ILI9488_DARKCYAN);
+    // ILI9488_printText("123456 qwert ASDFG", 40, 100, ILI9488_BLUE,ILI9488_DARKGREY, 1);
 }
 
 
