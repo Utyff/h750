@@ -623,6 +623,12 @@ void fillScreen(uint16_t color) {
     LCDClear_us = DWT_Elapsed_Tick(t0) / DWT_IN_MICROSEC;
 }
 
+// #define MAX_TR_SIZE 65535
+#define MAX_TR_SIZE 32767
+#define SZ_SIZE 20
+uint32_t sz[SZ_SIZE];
+uint32_t sz_count=0;
+
 void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
 
@@ -643,14 +649,14 @@ void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 	b = (b * 255) / 31;
 
 	n = w*h*3;
-	if (n <= 65535){
+	if (n <= MAX_TR_SIZE){
 		cnt = 1;
 		buf_size = n;
 	}
 	else {
 		cnt = n/3;
 		buf_size = 3;
-		uint8_t min_cnt = n/65535+1;
+		uint8_t min_cnt = n/MAX_TR_SIZE+1;
 		for (i=min_cnt; i < n/3; i++){
 			if(n%i == 0){
 				cnt = i;
@@ -670,6 +676,9 @@ void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
     DC_DATA();
     CS_A();
     while(cnt>0) {
+        if (sz_count <SZ_SIZE) {
+            sz[sz_count++] = buf_size;
+        }
         HAL_SPI_Transmit(&hspi1, frm_buf, buf_size, HAL_MAX_DELAY);
         cnt -= 1;
     }
