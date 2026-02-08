@@ -46,12 +46,12 @@ add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 #    add_compile_options(-Os)
 #else ()
     message(STATUS "Minimal optimization, debug info included")
-    add_compile_options(-O0 -g)
+    add_compile_options(-Og -g)
 #endif ()
 
 include_directories(usr/inc Core/Inc Drivers/STM32H7xx_HAL_Driver/Inc Drivers/CMSIS/Device/ST/STM32H7xx/Include Drivers/CMSIS/Include Drivers/STM32H7xx_HAL_Driver/Inc/Legacy)
 
-add_definitions(-DDEBUG -DUSE_PWR_LDO_SUPPLY -DSTM32H750xx -DUSE_HAL_DRIVER)
+add_definitions(-DDEBUG -DUSE_PWR_LDO_SUPPLY -DSTM32H750xx -DUSE_FULL_LL_DRIVER -DUSE_HAL_DRIVER)
 
 file(GLOB_RECURSE SOURCES "usr/*.*" "Core/*.*" "Drivers/*.*")
 

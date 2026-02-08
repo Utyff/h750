@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <string.h>
 
-extern SPI_HandleTypeDef hspi1;
 
 #define RST_A() HAL_GPIO_WritePin(TFT_RST_GPIO_Port,TFT_RST_Pin,GPIO_PIN_RESET)
 #define RST_D() HAL_GPIO_WritePin(TFT_RST_GPIO_Port,TFT_RST_Pin,GPIO_PIN_SET)

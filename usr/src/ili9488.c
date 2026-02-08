@@ -1,11 +1,9 @@
 #include "ili9488.h"
 #include "dwt.h"
 
-extern SPI_HandleTypeDef hspi1;
 
 static uint8_t rotationNum=1;
 static bool _cp437    = false;
-static SPI_HandleTypeDef lcdSPIhandle;
 //Chip Select pin
 static GPIO_TypeDef  *tftCS_GPIO;
 static uint16_t tftCS_PIN;
@@ -277,7 +275,26 @@ const unsigned char font1[] = {
 	0x00, 0x3C, 0x3C, 0x3C, 0x3C,
 	0x00, 0x00, 0x00, 0x00, 0x00
 };
-//***** Functions prototypes *****//
+
+
+void SPI_Transmit(const uint8_t *txData, const uint32_t size) {
+    uint32_t txI = 0;
+
+    LL_SPI_SetTransferSize(SPI1, size);
+    LL_SPI_StartMasterTransfer(SPI1);
+
+    while (txI < size) {
+        // Wait for TXP (TX Packet Space Available)
+    	while(!LL_SPI_IsActiveFlag_TXP(SPI1)) {}
+        if (LL_SPI_IsActiveFlag_TXTF(SPI1)) {
+            LL_SPI_ClearFlag_TXTF(SPI1);
+            continue;
+        }
+        LL_SPI_TransmitData8(SPI1, txData[txI++]);
+    }
+    while (!LL_SPI_IsActiveFlag_EOT(SPI1)) {}
+    LL_SPI_ClearFlag_EOT(SPI1);
+}
 
 //1. Write Command to LCD
 void ILI9488_SendCommand(uint8_t com)
@@ -289,7 +306,7 @@ void ILI9488_SendCommand(uint8_t com)
 	//Put CS LOW
 	CS_A();
 	//Write byte using SPI
-	HAL_SPI_Transmit(&hspi1, &tmpCmd, 1, 1);
+	SPI_Transmit(&tmpCmd, 1);
     //Bring CS HIGH
 	CS_D();
 }
@@ -304,7 +321,7 @@ void ILI9488_SendData(uint8_t data)
 	//Put CS LOW
 	CS_A();
 	//Write byte using SPI
-	HAL_SPI_Transmit(&hspi1, &tmpCmd, 1, 1);
+    SPI_Transmit(&tmpCmd, 1);
     //Bring CS HIGH
 	CS_D();
 }
@@ -315,7 +332,7 @@ void ILI9488_SendData_Multi(uint8_t *buff, size_t buff_size){
 	CS_A();
 	while (buff_size > 0){
 		uint16_t chunk_size = buff_size > 32768 ? 32768 : buff_size;
-		HAL_SPI_Transmit(&hspi1, buff, chunk_size, HAL_MAX_DELAY);
+        SPI_Transmit(buff, chunk_size);
 		buff += chunk_size;
 		buff_size -= chunk_size;
 	}
@@ -413,7 +430,7 @@ void ILI9488_Init() {
     HAL_Delay(120);
 
     ILI9488_SendCommand(ILI9488_DISPON);  // Display on
-
+    setRotation(1);
 }
 
 void setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
@@ -460,7 +477,7 @@ void pushColors(uint16_t *data, uint8_t len, uint8_t first)
 		buff[count] = ((color & 0x001F) * 255) / 31;
 		count++;
 	}
-	HAL_SPI_Transmit(&lcdSPIhandle, buff, len * 3, 100);
+    SPI_Transmit(buff, len * 3);
 	HAL_GPIO_WritePin(tftCS_GPIO, tftCS_PIN, GPIO_PIN_SET);
 }
 
@@ -496,7 +513,7 @@ void drawImage(const uint8_t* img, uint16_t x, uint16_t y, uint16_t w, uint16_t 
 			linebuff[pixcount] = ((color & 0x001F) * 255) / 31;
 			pixcount++;
 		}
-		HAL_SPI_Transmit(&lcdSPIhandle, linebuff, w * 3, 100);
+        SPI_Transmit(linebuff, w * 3);
 
 	}
 
@@ -623,12 +640,8 @@ void fillScreen(uint16_t color) {
     LCDClear_us = DWT_Elapsed_Tick(t0) / DWT_IN_MICROSEC;
 }
 
-// #define MAX_TR_SIZE 65535
-#define MAX_TR_SIZE 32767
-#define SZ_SIZE 20
-uint32_t sz[SZ_SIZE];
-uint32_t sz_count=0;
-
+#define MAX_TR_SIZE 65535
+// #define MAX_TR_SIZE 32767
 void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
 
@@ -676,10 +689,7 @@ void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
     DC_DATA();
     CS_A();
     while(cnt>0) {
-        if (sz_count <SZ_SIZE) {
-            sz[sz_count++] = buf_size;
-        }
-        HAL_SPI_Transmit(&hspi1, frm_buf, buf_size, HAL_MAX_DELAY);
+        SPI_Transmit(frm_buf, buf_size);
         cnt -= 1;
     }
     CS_D();
