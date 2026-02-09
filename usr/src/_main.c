@@ -8,22 +8,30 @@ void CORECheck();
 
 void FPUCheck();
 
+const char buildDate[] = __DATE__;
+const char buildTime[] = __TIME__;
+
 void ili9488_Fill() {
     fillScreen(ILI9488_NAVY);
-    testLines(ILI9488_CYAN);
-    fillScreen(ILI9488_DARKCYAN);
+    // testLines(ILI9488_CYAN);
+    // fillScreen(ILI9488_DARKCYAN);
     ILI9488_printText("123456 qwert ASDFG", 40, 100, ILI9488_BLUE,ILI9488_DARKGREY, 1);
 }
 
 
 void mainInitialize() {
+    char buf[120];
+    sprintf(buf, "\n\nBuild: %s %s\n", buildDate, buildTime);
+    DBG_Trace(buf);
+
+    CORECheck();
+    FPUCheck();
+
     DWT_Init();
 
     ILI9488_Init();
     ili9488_Fill();
 
-    CORECheck();
-    FPUCheck();
 }
 
 void mainCycle() {
@@ -31,7 +39,6 @@ void mainCycle() {
     if ((random() & 0xf) < 3) GPIOB->ODR ^= LED1_Pin;
     if ((random() & 0xf) < 3) GPIOB->ODR ^= LED2_Pin;
     if ((random() & 0xf) < 3) GPIOB->ODR ^= LED3_Pin;
-//    if ((random() & 7) < 3) HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
 
     delay_ms(50);
 }
@@ -62,6 +69,9 @@ void FPUCheck(void) {
     mvfr0 = *(volatile uint32_t *) 0xE000EF40;
 
     switch (mvfr0) {
+        case 0x00000000 :
+            sprintf(buf, "No FPU\n");
+            break;
         case 0x10110021 :
             sprintf(buf, "FPU-S Single-precision only\n");
             break;
@@ -69,7 +79,7 @@ void FPUCheck(void) {
             sprintf(buf, "FPU-D Single-precision and Double-precision\n");
             break;
         default :
-            sprintf(buf, "Unknown FPU");
+            sprintf(buf, "Unknown FPU\n");
     }
     DBG_Trace(buf);
 }
@@ -79,7 +89,7 @@ void CORECheck(void) {
     uint32_t cpuid = SCB->CPUID;
     uint32_t var, pat;
 
-    sprintf(buf, "\n\nCPUID %08X DEVID %03X DEVREV %03X\n", cpuid, DBGMCU->IDCODE & 0xFFF, DBGMCU->IDCODE >> 16);
+    sprintf(buf, "\nCPUID %08X DEVID %03X REVID %04X\n", cpuid, DBGMCU->IDCODE & 0xFFF, DBGMCU->IDCODE >> 16);
     DBG_Trace(buf);
 
     pat = (cpuid & 0x0000000F);
@@ -106,11 +116,14 @@ void CORECheck(void) {
             case 0xC27 :
                 sprintf(buf, "Cortex M7 r%dp%d\n", var, pat);
                 break;
+            case 0xD21 :
+                sprintf(buf, "Cortex M33 r%dp%d\n", var, pat);
+                break;
 
             default :
-                sprintf(buf, "Unknown CORE");
+                sprintf(buf, "Unknown CORE\n");
         }
     } else
-        sprintf(buf, "Unknown CORE IMPLEMENTER");
+        sprintf(buf, "Unknown CORE IMPLEMENTER\n");
     DBG_Trace(buf);
 }
