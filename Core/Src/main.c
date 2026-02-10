@@ -250,7 +250,7 @@ static void MX_LPTIM2_Init(void)
   /* USER CODE END LPTIM2_Init 1 */
   hlptim2.Instance = LPTIM2;
   hlptim2.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
-  hlptim2.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV4;
+  hlptim2.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV1;
   hlptim2.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
   hlptim2.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_LOW;
   hlptim2.Init.UpdateMode = LPTIM_UPDATE_ENDOFPERIOD;
@@ -263,7 +263,7 @@ static void MX_LPTIM2_Init(void)
   }
   /* USER CODE BEGIN LPTIM2_Init 2 */
 
-  uint32_t periodValue = 1000; // (2 * LSE_VALUE)/4;    // Calculate the Timer  Autoreload value for 2sec period
+  uint32_t periodValue = 1; // (2 * LSE_VALUE)/4;    // Calculate the Timer  Autoreload value for 2sec period
   uint32_t pulseValue  = periodValue/2;        // Set the Timer  pulse value for 50% duty cycle
   if (HAL_LPTIM_PWM_Start(&hlptim2, periodValue, pulseValue) != HAL_OK) {
       Error_Handler();
@@ -478,7 +478,7 @@ static void MX_GPIO_Init(void)
                           |GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_0|GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BTN1_Pin */
