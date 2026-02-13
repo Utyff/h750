@@ -64,7 +64,6 @@ static void MX_SPI1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int count;
 #define SECTION_RAM_D2 __attribute__((section(".RAM_D2"))) /* AHB SRAM (D2 domain): */
 #define SECTION_RAM_D3 __attribute__((section(".RAM_D3"))) /* AHB SRAM (D3 domain): */
 
@@ -74,12 +73,11 @@ uint16_t samplesCount = 0;
 #define BUFLEN (32)
 uint16_t __attribute__((section (".RAM_D3"))) dmabuf[BUFLEN];
 
-__IO   uint32_t DMA_TransferErrorFlag = 0;
-
-static void HAL_TransferError(DMA_HandleTypeDef *hdma)
-{
-    DMA_TransferErrorFlag = 1;
-}
+// __IO   uint32_t DMA_TransferErrorFlag = 0;
+// static void HAL_TransferError(DMA_HandleTypeDef *hdma)
+// {
+//     DMA_TransferErrorFlag = 1;
+// }
 
 /* USER CODE END 0 */
 
@@ -132,16 +130,16 @@ int main(void)
 
   // DMA configure begin
   // Register Error Callback
-  HAL_DMA_RegisterCallback(&hdma_bdma_generator0, HAL_DMA_XFER_ERROR_CB_ID, &HAL_TransferError);
+  // HAL_DMA_RegisterCallback(&hdma_bdma_generator0, HAL_DMA_XFER_ERROR_CB_ID, &HAL_TransferError);
   // NVIC configuration for DMA transfer complete interrupt
-  HAL_NVIC_SetPriority(BDMA_Channel0_IRQn, 0, 1);
-  HAL_NVIC_EnableIRQ(BDMA_Channel0_IRQn);
+  // HAL_NVIC_SetPriority(BDMA_Channel0_IRQn, 0, 1);
+  // HAL_NVIC_EnableIRQ(BDMA_Channel0_IRQn);
 
   // NVIC configuration for DMAMUX request generator overrun errors
-  HAL_NVIC_SetPriority(DMAMUX2_OVR_IRQn, 0, 1);
-  HAL_NVIC_EnableIRQ(DMAMUX2_OVR_IRQn);
+  // HAL_NVIC_SetPriority(DMAMUX2_OVR_IRQn, 0, 1);
+  // HAL_NVIC_EnableIRQ(DMAMUX2_OVR_IRQn);
 
-  HAL_DMAEx_EnableMuxRequestGenerator (&hdma_bdma_generator0);
+  // HAL_DMAEx_EnableMuxRequestGenerator (&hdma_bdma_generator0);
   // DMA configure end
 
   LL_SPI_Enable(SPI1);
@@ -153,6 +151,12 @@ int main(void)
   //  to LED1 GPIO ODR register in order to turn LED1 On/Off each time comes a request from the DMAMUX request generator
   HAL_DMA_Start_IT(&hdma_bdma_generator0, (uint32_t)dmabuf, (uint32_t)&GPIOE->ODR, BUFLEN);
 
+  uint32_t periodValue = 1; // (2 * LSE_VALUE)/4;    // Calculate the Timer  Autoreload value for 2sec period
+  uint32_t pulseValue  = periodValue/2;        // Set the Timer  pulse value for 50% duty cycle
+  if (HAL_LPTIM_PWM_Start(&hlptim2, periodValue, pulseValue) != HAL_OK) {
+    Error_Handler();
+  }
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -161,7 +165,6 @@ int main(void)
 #pragma ide diagnostic ignored "EndlessLoop"
   while (1)
   {
-      count++;
       mainCycle();
     /* USER CODE END WHILE */
 
@@ -262,12 +265,6 @@ static void MX_LPTIM2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN LPTIM2_Init 2 */
-
-  uint32_t periodValue = 1; // (2 * LSE_VALUE)/4;    // Calculate the Timer  Autoreload value for 2sec period
-  uint32_t pulseValue  = periodValue/2;        // Set the Timer  pulse value for 50% duty cycle
-  if (HAL_LPTIM_PWM_Start(&hlptim2, periodValue, pulseValue) != HAL_OK) {
-      Error_Handler();
-  }
 
   /* USER CODE END LPTIM2_Init 2 */
 
@@ -412,7 +409,7 @@ static void MX_BDMA_Init(void)
   hdma_bdma_generator0.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
   hdma_bdma_generator0.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
   hdma_bdma_generator0.Init.Mode = DMA_CIRCULAR;
-  hdma_bdma_generator0.Init.Priority = DMA_PRIORITY_LOW;
+  hdma_bdma_generator0.Init.Priority = DMA_PRIORITY_VERY_HIGH;
   if (HAL_DMA_Init(&hdma_bdma_generator0) != HAL_OK)
   {
     Error_Handler( );
@@ -426,14 +423,6 @@ static void MX_BDMA_Init(void)
   {
     Error_Handler( );
   }
-
-  /* DMA interrupt init */
-  /* DMAMUX2_OVR_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMAMUX2_OVR_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMAMUX2_OVR_IRQn);
-  /* BDMA_Channel0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(BDMA_Channel0_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(BDMA_Channel0_IRQn);
 
 }
 
