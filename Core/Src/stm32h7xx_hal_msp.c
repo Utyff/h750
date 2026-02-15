@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
+extern DMA_HandleTypeDef hdma_tim3_ch2;
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
@@ -57,7 +58,9 @@
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
-/**
+
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+                    /**
   * Initializes the Global MSP.
   */
 void HAL_MspInit(void)
@@ -77,84 +80,95 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief LPTIM MSP Initialization
+  * @brief TIM_Base MSP Initialization
   * This function configures the hardware resources used in this example
-  * @param hlptim: LPTIM handle pointer
+  * @param htim_base: TIM_Base handle pointer
   * @retval None
   */
-void HAL_LPTIM_MspInit(LPTIM_HandleTypeDef* hlptim)
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-  if(hlptim->Instance==LPTIM2)
+  if(htim_base->Instance==TIM3)
   {
-    /* USER CODE BEGIN LPTIM2_MspInit 0 */
+    /* USER CODE BEGIN TIM3_MspInit 0 */
 
-    /* USER CODE END LPTIM2_MspInit 0 */
+    /* USER CODE END TIM3_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_TIM3_CLK_ENABLE();
 
-  /** Initializes the peripherals clock
-  */
-    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LPTIM2;
-    PeriphClkInitStruct.PLL2.PLL2M = 1;
-    PeriphClkInitStruct.PLL2.PLL2N = 14;
-    PeriphClkInitStruct.PLL2.PLL2P = 4;
-    PeriphClkInitStruct.PLL2.PLL2Q = 4;
-    PeriphClkInitStruct.PLL2.PLL2R = 2;
-    PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_3;
-    PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
-    PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
-    PeriphClkInitStruct.Lptim2ClockSelection = RCC_LPTIM2CLKSOURCE_PLL2;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    /* TIM3 DMA Init */
+    /* TIM3_CH2 Init */
+    hdma_tim3_ch2.Instance = DMA1_Stream7;
+    hdma_tim3_ch2.Init.Request = DMA_REQUEST_TIM3_CH2;
+    hdma_tim3_ch2.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_tim3_ch2.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_tim3_ch2.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_tim3_ch2.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_tim3_ch2.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    hdma_tim3_ch2.Init.Mode = DMA_CIRCULAR;
+    hdma_tim3_ch2.Init.Priority = DMA_PRIORITY_VERY_HIGH;
+    hdma_tim3_ch2.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    if (HAL_DMA_Init(&hdma_tim3_ch2) != HAL_OK)
     {
       Error_Handler();
     }
 
-    /* Peripheral clock enable */
-    __HAL_RCC_LPTIM2_CLK_ENABLE();
+    __HAL_LINKDMA(htim_base,hdma[TIM_DMA_ID_CC2],hdma_tim3_ch2);
 
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**LPTIM2 GPIO Configuration
-    PB13     ------> LPTIM2_OUT
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_13;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF3_LPTIM2;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    /* USER CODE BEGIN TIM3_MspInit 1 */
 
-    /* USER CODE BEGIN LPTIM2_MspInit 1 */
-
-    /* USER CODE END LPTIM2_MspInit 1 */
+    /* USER CODE END TIM3_MspInit 1 */
 
   }
 
 }
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  if(htim->Instance==TIM3)
+  {
+    /* USER CODE BEGIN TIM3_MspPostInit 0 */
+
+    /* USER CODE END TIM3_MspPostInit 0 */
+
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    /**TIM3 GPIO Configuration
+    PA7     ------> TIM3_CH2
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_7;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /* USER CODE BEGIN TIM3_MspPostInit 1 */
+
+    /* USER CODE END TIM3_MspPostInit 1 */
+  }
+
+}
 /**
-  * @brief LPTIM MSP De-Initialization
+  * @brief TIM_Base MSP De-Initialization
   * This function freeze the hardware resources used in this example
-  * @param hlptim: LPTIM handle pointer
+  * @param htim_base: TIM_Base handle pointer
   * @retval None
   */
-void HAL_LPTIM_MspDeInit(LPTIM_HandleTypeDef* hlptim)
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 {
-  if(hlptim->Instance==LPTIM2)
+  if(htim_base->Instance==TIM3)
   {
-    /* USER CODE BEGIN LPTIM2_MspDeInit 0 */
+    /* USER CODE BEGIN TIM3_MspDeInit 0 */
 
-    /* USER CODE END LPTIM2_MspDeInit 0 */
+    /* USER CODE END TIM3_MspDeInit 0 */
     /* Peripheral clock disable */
-    __HAL_RCC_LPTIM2_CLK_DISABLE();
+    __HAL_RCC_TIM3_CLK_DISABLE();
 
-    /**LPTIM2 GPIO Configuration
-    PB13     ------> LPTIM2_OUT
-    */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_13);
+    /* TIM3 DMA DeInit */
+    HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
+    /* USER CODE BEGIN TIM3_MspDeInit 1 */
 
-    /* USER CODE BEGIN LPTIM2_MspDeInit 1 */
-
-    /* USER CODE END LPTIM2_MspDeInit 1 */
+    /* USER CODE END TIM3_MspDeInit 1 */
   }
 
 }

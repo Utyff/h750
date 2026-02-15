@@ -1,7 +1,6 @@
 #include <_main.h>
 #include <stdlib.h>
 #include <delay.h>
-#include "ili9488.h"
 
 
 void CORECheck();
@@ -10,13 +9,6 @@ void FPUCheck();
 
 const char buildDate[] = __DATE__;
 const char buildTime[] = __TIME__;
-
-void ili9488_Fill() {
-    fillScreen(ILI9488_NAVY);
-    // testLines(ILI9488_CYAN);
-    // fillScreen(ILI9488_DARKCYAN);
-    ILI9488_printText("123456 qwert ASDFG", 40, 100, ILI9488_BLUE,ILI9488_DARKGREY, 1);
-}
 
 
 void mainInitialize() {
@@ -28,10 +20,6 @@ void mainInitialize() {
     FPUCheck();
 
     DWT_Init();
-
-    ILI9488_Init();
-    ili9488_Fill();
-
 }
 
 void mainCycle() {

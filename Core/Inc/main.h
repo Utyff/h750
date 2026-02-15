@@ -28,17 +28,6 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
-#include "stm32h7xx_ll_rcc.h"
-#include "stm32h7xx_ll_spi.h"
-#include "stm32h7xx_ll_bus.h"
-#include "stm32h7xx_ll_cortex.h"
-#include "stm32h7xx_ll_system.h"
-#include "stm32h7xx_ll_utils.h"
-#include "stm32h7xx_ll_pwr.h"
-#include "stm32h7xx_ll_gpio.h"
-#include "stm32h7xx_ll_dma.h"
-
-#include "stm32h7xx_ll_exti.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -60,6 +49,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -70,12 +61,6 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BTN1_Pin GPIO_PIN_13
 #define BTN1_GPIO_Port GPIOC
-#define TFT_CS_Pin GPIO_PIN_2
-#define TFT_CS_GPIO_Port GPIOA
-#define TFT_RST_Pin GPIO_PIN_3
-#define TFT_RST_GPIO_Port GPIOA
-#define TFT_DC_Pin GPIO_PIN_4
-#define TFT_DC_GPIO_Port GPIOA
 #define LED1_Pin GPIO_PIN_0
 #define LED1_GPIO_Port GPIOB
 #define LED3_Pin GPIO_PIN_14

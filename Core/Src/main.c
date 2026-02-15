@@ -42,11 +42,11 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-LPTIM_HandleTypeDef hlptim2;
+TIM_HandleTypeDef htim3;
+DMA_HandleTypeDef hdma_tim3_ch2;
 
 UART_HandleTypeDef huart1;
 
-DMA_HandleTypeDef hdma_bdma_generator0;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -54,24 +54,22 @@ DMA_HandleTypeDef hdma_bdma_generator0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_BDMA_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
-static void MX_LPTIM2_Init(void);
-static void MX_SPI1_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#define SECTION_RAM_D2 __attribute__((section(".RAM_D2"))) /* AHB SRAM (D2 domain): */
-#define SECTION_RAM_D3 __attribute__((section(".RAM_D3"))) /* AHB SRAM (D3 domain): */
+#define SECTION_RAM_D1 __attribute__((section(".RAM_D1"))) /* AHB SRAM (D1 domain): AXI SRAM */
+#define SECTION_RAM_D2 __attribute__((section(".RAM_D2"))) /* AHB SRAM (D2 domain): SRAM1-3 */
+#define SECTION_RAM_D3 __attribute__((section(".RAM_D3"))) /* AHB SRAM (D3 domain): SRAM4 */
 
 // DMA-Memory: Global Array in SRAM1, 32byte-aligned
-uint16_t __ALIGNED(4)  SECTION_RAM_D2 samples[2048];
-uint16_t samplesCount = 0;
 #define BUFLEN (32)
-uint16_t __attribute__((section (".RAM_D3"))) dmabuf[BUFLEN];
+uint16_t __ALIGNED(4) SECTION_RAM_D2 dmabuf[BUFLEN];
 
 // __IO   uint32_t DMA_TransferErrorFlag = 0;
 // static void HAL_TransferError(DMA_HandleTypeDef *hdma)
@@ -118,44 +116,33 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_BDMA_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
-  MX_LPTIM2_Init();
-  MX_SPI1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+
+  mainInitialize();
 
   for(int i=0; i<BUFLEN; i++) {
       dmabuf[i] = i;
   }
 
   // DMA configure begin
-  // Register Error Callback
-  // HAL_DMA_RegisterCallback(&hdma_bdma_generator0, HAL_DMA_XFER_ERROR_CB_ID, &HAL_TransferError);
-  // NVIC configuration for DMA transfer complete interrupt
-  // HAL_NVIC_SetPriority(BDMA_Channel0_IRQn, 0, 1);
-  // HAL_NVIC_EnableIRQ(BDMA_Channel0_IRQn);
-
-  // NVIC configuration for DMAMUX request generator overrun errors
-  // HAL_NVIC_SetPriority(DMAMUX2_OVR_IRQn, 0, 1);
-  // HAL_NVIC_EnableIRQ(DMAMUX2_OVR_IRQn);
-
   // HAL_DMAEx_EnableMuxRequestGenerator (&hdma_bdma_generator0);
-  // DMA configure end
-
-  LL_SPI_Enable(SPI1);
-
-  mainInitialize();
 
   // ##-5- Start the DMA transfer ################################################
   //  DMA source buffer is SRC_BUFFER_LED1_TOGGLE containing values to be written
   //  to LED1 GPIO ODR register in order to turn LED1 On/Off each time comes a request from the DMAMUX request generator
-  HAL_DMA_Start_IT(&hdma_bdma_generator0, (uint32_t)dmabuf, (uint32_t)&GPIOE->ODR, BUFLEN);
+  // HAL_DMA_Start_IT(&hdma_bdma_generator0, (uint32_t)dmabuf, (uint32_t)&GPIOE->ODR, BUFLEN);
+  // HAL_DMA_Start_IT(&hdma_dma_generator0, (uint32_t)dmabuf, (uint32_t)&GPIOE->ODR, BUFLEN);
+  HAL_DMA_Start_IT(&hdma_tim3_ch2, (uint32_t)dmabuf, (uint32_t)&GPIOE->ODR, BUFLEN);
 
-  uint32_t periodValue = 1; // (2 * LSE_VALUE)/4;    // Calculate the Timer  Autoreload value for 2sec period
-  uint32_t pulseValue  = periodValue/2;        // Set the Timer  pulse value for 50% duty cycle
-  if (HAL_LPTIM_PWM_Start(&hlptim2, periodValue, pulseValue) != HAL_OK) {
-    Error_Handler();
-  }
+  // uint32_t periodValue = 1; // (2 * LSE_VALUE)/4;    // Calculate the Timer  Autoreload value for 2sec period
+  // uint32_t pulseValue  = periodValue/2;        // Set the Timer  pulse value for 50% duty cycle
+  // if (HAL_LPTIM_PWM_Start(&hlptim2, periodValue, pulseValue) != HAL_OK) {
+  //   Error_Handler();
+  // }
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 
   /* USER CODE END 2 */
 
@@ -237,102 +224,61 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief LPTIM2 Initialization Function
+  * @brief TIM3 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_LPTIM2_Init(void)
+static void MX_TIM3_Init(void)
 {
 
-  /* USER CODE BEGIN LPTIM2_Init 0 */
+  /* USER CODE BEGIN TIM3_Init 0 */
 
-  /* USER CODE END LPTIM2_Init 0 */
+  /* USER CODE END TIM3_Init 0 */
 
-  /* USER CODE BEGIN LPTIM2_Init 1 */
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
 
-  /* USER CODE END LPTIM2_Init 1 */
-  hlptim2.Instance = LPTIM2;
-  hlptim2.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
-  hlptim2.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV1;
-  hlptim2.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
-  hlptim2.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_LOW;
-  hlptim2.Init.UpdateMode = LPTIM_UPDATE_ENDOFPERIOD;
-  hlptim2.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
-  hlptim2.Init.Input1Source = LPTIM_INPUT1SOURCE_GPIO;
-  hlptim2.Init.Input2Source = LPTIM_INPUT2SOURCE_GPIO;
-  if (HAL_LPTIM_Init(&hlptim2) != HAL_OK)
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 99;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 999;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN LPTIM2_Init 2 */
-
-  /* USER CODE END LPTIM2_Init 2 */
-
-}
-
-/**
-  * @brief SPI1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI1_Init(void)
-{
-
-  /* USER CODE BEGIN SPI1_Init 0 */
-
-  /* USER CODE END SPI1_Init 0 */
-
-  LL_SPI_InitTypeDef SPI_InitStruct = {0};
-
-  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-
-  /** Initializes the peripherals clock
-  */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SPI1;
-  PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_PLL;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
   {
     Error_Handler();
   }
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 499;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
 
-  /* Peripheral clock enable */
-  LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SPI1);
-
-  LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOA);
-  /**SPI1 GPIO Configuration
-  PA5   ------> SPI1_SCK
-  PA7   ------> SPI1_MOSI
-  */
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_5|LL_GPIO_PIN_7;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_DOWN;
-  GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
-  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN SPI1_Init 1 */
-
-  /* USER CODE END SPI1_Init 1 */
-  /* SPI1 parameter configuration*/
-  SPI_InitStruct.TransferDirection = LL_SPI_SIMPLEX_TX;
-  SPI_InitStruct.Mode = LL_SPI_MODE_MASTER;
-  SPI_InitStruct.DataWidth = LL_SPI_DATAWIDTH_8BIT;
-  SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_LOW;
-  SPI_InitStruct.ClockPhase = LL_SPI_PHASE_1EDGE;
-  SPI_InitStruct.NSS = LL_SPI_NSS_SOFT;
-  SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV4;
-  SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
-  SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
-  SPI_InitStruct.CRCPoly = 0x0;
-  LL_SPI_Init(SPI1, &SPI_InitStruct);
-  LL_SPI_SetStandard(SPI1, LL_SPI_PROTOCOL_MOTOROLA);
-  LL_SPI_SetFIFOThreshold(SPI1, LL_SPI_FIFO_TH_01DATA);
-  LL_SPI_DisableNSSPulseMgt(SPI1);
-  /* USER CODE BEGIN SPI1_Init 2 */
-
-  /* USER CODE END SPI1_Init 2 */
+  /* USER CODE END TIM3_Init 2 */
+  HAL_TIM_MspPostInit(&htim3);
 
 }
 
@@ -388,41 +334,20 @@ static void MX_USART1_UART_Init(void)
 
 /**
   * Enable DMA controller clock
-  * Configure DMA for memory to memory transfers
-  *   hdma_bdma_generator0
   */
-static void MX_BDMA_Init(void)
+static void MX_DMA_Init(void)
 {
 
-  /* Local variables */
-  HAL_DMA_MuxRequestGeneratorConfigTypeDef pRequestGeneratorConfig = {0};
-
   /* DMA controller clock enable */
-  __HAL_RCC_BDMA_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
-  /* Configure DMA request hdma_bdma_generator0 on BDMA_Channel0 */
-  hdma_bdma_generator0.Instance = BDMA_Channel0;
-  hdma_bdma_generator0.Init.Request = BDMA_REQUEST_GENERATOR0;
-  hdma_bdma_generator0.Init.Direction = DMA_MEMORY_TO_PERIPH;
-  hdma_bdma_generator0.Init.PeriphInc = DMA_PINC_DISABLE;
-  hdma_bdma_generator0.Init.MemInc = DMA_MINC_ENABLE;
-  hdma_bdma_generator0.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-  hdma_bdma_generator0.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-  hdma_bdma_generator0.Init.Mode = DMA_CIRCULAR;
-  hdma_bdma_generator0.Init.Priority = DMA_PRIORITY_VERY_HIGH;
-  if (HAL_DMA_Init(&hdma_bdma_generator0) != HAL_OK)
-  {
-    Error_Handler( );
-  }
-
-  /* Configure the DMAMUX request generator for the selected BDMA channel */
-  pRequestGeneratorConfig.SignalID = HAL_DMAMUX2_REQ_GEN_LPTIM2_OUT;
-  pRequestGeneratorConfig.Polarity = HAL_DMAMUX_REQ_GEN_RISING;
-  pRequestGeneratorConfig.RequestNumber = 1;
-  if (HAL_DMAEx_ConfigMuxRequestGenerator(&hdma_bdma_generator0, &pRequestGeneratorConfig) != HAL_OK)
-  {
-    Error_Handler( );
-  }
+  /* DMA interrupt init */
+  /* DMA1_Stream7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream7_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream7_IRQn);
+  /* DMAMUX1_OVR_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMAMUX1_OVR_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMAMUX1_OVR_IRQn);
 
 }
 
@@ -452,9 +377,6 @@ static void MX_GPIO_Init(void)
                           |GPIO_PIN_14|GPIO_PIN_15|GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, TFT_CS_Pin|TFT_RST_Pin|TFT_DC_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED1_Pin|LED3_Pin|LED2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PE2 PE3 PE4 PE5
@@ -475,13 +397,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(BTN1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : TFT_CS_Pin TFT_RST_Pin TFT_DC_Pin */
-  GPIO_InitStruct.Pin = TFT_CS_Pin|TFT_RST_Pin|TFT_DC_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED1_Pin LED3_Pin LED2_Pin */
   GPIO_InitStruct.Pin = LED1_Pin|LED3_Pin|LED2_Pin;
