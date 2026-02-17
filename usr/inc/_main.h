@@ -15,11 +15,13 @@ typedef __IO uint32_t vu32;
 typedef __IO uint16_t vu16;
 typedef __IO uint8_t vu8;
 
-extern UART_HandleTypeDef huart1;
+// extern UART_HandleTypeDef huart1;
 
 void mainInitialize();
 
 void mainCycle();
+
+void UART_Transmit(const char *msg);
 
 #define DEBUG_TRACE_UART
 
@@ -33,7 +35,8 @@ void SWO_Trace(uint8_t* msg);
 #include "string.h"
 #include "stdio.h"
 
-#define DBG_Trace(msg) HAL_UART_Transmit(&huart1, (uint8_t*)(msg), (uint16_t)strlen((char*)(msg)), 0xFFFF)
+// #define DBG_Trace(msg) HAL_UART_Transmit(&huart1, (uint8_t*)(msg), (uint16_t)strlen((char*)(msg)), 0xFFFF)
+#define DBG_Trace(msg) UART_Transmit(msg)
 
 #elif defined(DEBUG_TRACE_NONE)
 

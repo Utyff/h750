@@ -31,6 +31,15 @@ void mainCycle() {
     delay_ms(50);
 }
 
+void UART_Transmit(const char *msg) {
+    int i = 0;
+    while (msg[i]) {
+        while (!LL_USART_IsActiveFlag_TXE_TXFNF(USART1)) {}
+        LL_USART_TransmitData8(USART1, msg[i]);
+        i++;
+    }
+}
+
 #ifdef DEBUG_TRACE_SWO
 
 void SWO_Trace(uint8_t *msg) {
