@@ -32,12 +32,28 @@ void mainCycle() {
 }
 
 void UART_Transmit(const char *msg) {
-    int i = 0;
-    while (msg[i]) {
-        while (!LL_USART_IsActiveFlag_TXE_TXFNF(USART1)) {}
-        LL_USART_TransmitData8(USART1, msg[i]);
-        i++;
-    }
+  static char __ALIGNED(__SCB_DCACHE_LINE_SIZE) SECTION_RAM_D2 txBuffer[250];
+  const uint32_t txBufferSize = strlen(msg);
+
+  while (DMA1_0_busy){}
+  DMA1_0_busy = 1;
+
+  stpcpy(txBuffer, msg);
+  SCB_CleanDCache_by_Addr((uint32_t*)txBuffer, txBufferSize);
+
+  // Stream 0 = TX
+  LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_0);
+  LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_0);
+  LL_DMA_ConfigAddresses(DMA1,
+                         LL_DMA_STREAM_0,
+                         (uint32_t) txBuffer,
+                         LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_TRANSMIT),
+                         LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_STREAM_0));
+  LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, txBufferSize);
+
+  LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_0);
+  LL_USART_EnableDMAReq_TX(USART1);
+  LL_USART_EnableDirectionTx(USART1);
 }
 
 #ifdef DEBUG_TRACE_SWO

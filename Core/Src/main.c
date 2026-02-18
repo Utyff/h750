@@ -61,9 +61,6 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#define SECTION_RAM_D1 __attribute__((section(".RAM_D1"))) /* AHB SRAM (D1 domain): AXI SRAM */
-#define SECTION_RAM_D2 __attribute__((section(".RAM_D2"))) /* AHB SRAM (D2 domain): SRAM1-3 */
-#define SECTION_RAM_D3 __attribute__((section(".RAM_D3"))) /* AHB SRAM (D3 domain): SRAM4 */
 
 // DMA-Memory: Global Array in SRAM1, 32byte-aligned
 #define BUFLEN (32)
@@ -119,33 +116,18 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
+  DMA1_0_busy = 0;
   mainInitialize();
 
   for(int i=0; i<BUFLEN; i++) {
       dmabuf[i] = i;
   }
-
-  // DMA configure begin
-  // HAL_DMAEx_EnableMuxRequestGenerator (&hdma_bdma_generator0);
-
-  // ##-5- Start the DMA transfer ################################################
-  //  DMA source buffer is SRC_BUFFER_LED1_TOGGLE containing values to be written
-  //  to LED1 GPIO ODR register in order to turn LED1 On/Off each time comes a request from the DMAMUX request generator
-  // HAL_DMA_Start_IT(&hdma_bdma_generator0, (uint32_t)dmabuf, (uint32_t)&GPIOE->ODR, BUFLEN);
-  // HAL_DMA_Start_IT(&hdma_dma_generator0, (uint32_t)dmabuf, (uint32_t)&GPIOE->ODR, BUFLEN);
-  // HAL_DMA_Start_IT(&hdma_tim3_ch2, (uint32_t)dmabuf, (uint32_t)&GPIOE->ODR, BUFLEN);
-
-  // uint32_t periodValue = 1; // (2 * LSE_VALUE)/4;    // Calculate the Timer  Autoreload value for 2sec period
-  // uint32_t pulseValue  = periodValue/2;        // Set the Timer  pulse value for 50% duty cycle
-  // if (HAL_LPTIM_PWM_Start(&hlptim2, periodValue, pulseValue) != HAL_OK) {
-  //   Error_Handler();
-  // }
-  // HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "EndlessLoop"
   while (1)
@@ -322,6 +304,19 @@ static void MX_USART1_UART_Init(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /* USART1 DMA Init */
+
+  /* USART1_TX Init */
+  LL_DMA_SetPeriphRequest(DMA1, LL_DMA_STREAM_0, LL_DMAMUX1_REQ_USART1_TX);
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_STREAM_0, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+  LL_DMA_SetStreamPriorityLevel(DMA1, LL_DMA_STREAM_0, LL_DMA_PRIORITY_VERYHIGH);
+  LL_DMA_SetMode(DMA1, LL_DMA_STREAM_0, LL_DMA_MODE_NORMAL);
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_STREAM_0, LL_DMA_PERIPH_NOINCREMENT);
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_STREAM_0, LL_DMA_MEMORY_INCREMENT);
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_STREAM_0, LL_DMA_PDATAALIGN_BYTE);
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_STREAM_0, LL_DMA_MDATAALIGN_BYTE);
+  LL_DMA_DisableFifoMode(DMA1, LL_DMA_STREAM_0);
+
   /* USER CODE BEGIN USART1_Init 1 */
 
   /* USER CODE END USART1_Init 1 */
@@ -363,10 +358,14 @@ static void MX_USART1_UART_Init(void)
 static void MX_DMA_Init(void)
 {
 
+  /* Init with LL driver */
   /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
+  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
 
   /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  NVIC_SetPriority(DMA1_Stream0_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(DMA1_Stream0_IRQn);
   /* DMA1_Stream7_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream7_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream7_IRQn);

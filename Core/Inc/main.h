@@ -28,6 +28,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
+#include "stm32h7xx_ll_dma.h"
 #include "stm32h7xx_ll_usart.h"
 #include "stm32h7xx_ll_rcc.h"
 #include "stm32h7xx_ll_bus.h"
@@ -36,7 +37,6 @@ extern "C" {
 #include "stm32h7xx_ll_utils.h"
 #include "stm32h7xx_ll_pwr.h"
 #include "stm32h7xx_ll_gpio.h"
-#include "stm32h7xx_ll_dma.h"
 
 #include "stm32h7xx_ll_exti.h"
 
@@ -47,6 +47,9 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+#define SECTION_RAM_D1 __attribute__((section(".RAM_D1"))) /* AHB SRAM (D1 domain): AXI SRAM */
+#define SECTION_RAM_D2 __attribute__((section(".RAM_D2"))) /* AHB SRAM (D2 domain): SRAM1-3 */
+#define SECTION_RAM_D3 __attribute__((section(".RAM_D3"))) /* AHB SRAM (D3 domain): SRAM4 */
 
 /* USER CODE END ET */
 
@@ -57,6 +60,7 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+extern uint8_t DMA1_0_busy;
 
 /* USER CODE END EM */
 
