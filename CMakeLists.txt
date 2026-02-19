@@ -49,9 +49,9 @@ add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
     add_compile_options(-Og -g)
 #endif ()
 
-include_directories(usr/inc Core/Inc Drivers/STM32H7xx_HAL_Driver/Inc Drivers/STM32H7xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32H7xx/Include Drivers/CMSIS/Include)
+include_directories(usr/inc Core/Inc Drivers/STM32H7xx_HAL_Driver/Inc Drivers/CMSIS/Device/ST/STM32H7xx/Include Drivers/CMSIS/Include)
 
-add_definitions(-DDEBUG -DUSE_PWR_LDO_SUPPLY -DUSE_HAL_DRIVER -DSTM32H750xx -DUSE_FULL_LL_DRIVER)
+add_definitions(-DDEBUG -DUSE_PWR_LDO_SUPPLY -DSTM32H750xx -DUSE_FULL_LL_DRIVER -DHSE_VALUE=16000000 -DHSE_STARTUP_TIMEOUT=100 -DLSE_STARTUP_TIMEOUT=5000 -DLSE_VALUE=32768 -DEXTERNAL_CLOCK_VALUE=12288000 -DHSI_VALUE=64000000 -DLSI_VALUE=32000 -DVDD_VALUE=3300)
 
 file(GLOB_RECURSE SOURCES "usr/*.*" "Core/*.*" "Drivers/*.*")
 
