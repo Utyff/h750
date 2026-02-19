@@ -55,7 +55,7 @@ uint8_t DMA1_0_busy;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-extern DMA_HandleTypeDef hdma_tim3_ch2;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -242,7 +242,6 @@ void DMA1_Stream7_IRQHandler(void)
   static uint32_t cntDMA1 =0;
   cntDMA1++;
   /* USER CODE END DMA1_Stream7_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_tim3_ch2);
   /* USER CODE BEGIN DMA1_Stream7_IRQn 1 */
 
   /* USER CODE END DMA1_Stream7_IRQn 1 */

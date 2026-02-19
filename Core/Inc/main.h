@@ -29,6 +29,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
 #include "stm32h7xx_ll_dma.h"
+#include "stm32h7xx_ll_tim.h"
 #include "stm32h7xx_ll_usart.h"
 #include "stm32h7xx_ll_rcc.h"
 #include "stm32h7xx_ll_bus.h"
@@ -63,8 +64,6 @@ extern "C" {
 extern uint8_t DMA1_0_busy;
 
 /* USER CODE END EM */
-
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
