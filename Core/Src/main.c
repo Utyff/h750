@@ -119,7 +119,13 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
+  // start uart
   DMA1_0_busy = 0;
+  LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_0);
+  LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_0);
+  LL_USART_EnableDMAReq_TX(USART1);
+  LL_USART_EnableDirectionTx(USART1);
+
   mainInitialize();
 
   for(int i=0; i<BUFLEN; i++) {

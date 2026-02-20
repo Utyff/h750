@@ -39,21 +39,16 @@ void UART_Transmit(const char *msg) {
   DMA1_0_busy = 1;
 
   stpcpy(txBuffer, msg);
-  SCB_CleanDCache_by_Addr((uint32_t*)txBuffer, txBufferSize);
+  SCB_CleanDCache_by_Addr((uint32_t*)txBuffer, (int32_t)txBufferSize);
 
   // Stream 0 = TX
-  LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_0);
-  LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_0);
   LL_DMA_ConfigAddresses(DMA1,
                          LL_DMA_STREAM_0,
                          (uint32_t) txBuffer,
                          LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_TRANSMIT),
                          LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_STREAM_0));
   LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, txBufferSize);
-
   LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_0);
-  LL_USART_EnableDMAReq_TX(USART1);
-  LL_USART_EnableDirectionTx(USART1);
 }
 
 #ifdef DEBUG_TRACE_SWO
