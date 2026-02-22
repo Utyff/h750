@@ -109,6 +109,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  LL_RCC_HSE_EnableCSS();
 
   /* USER CODE END SysInit */
 
@@ -174,7 +175,6 @@ void SystemClock_Config(void)
   {
 
   }
-  LL_RCC_HSE_EnableCSS();
   LL_RCC_PLL_SetSource(LL_RCC_PLLSOURCE_HSE);
   LL_RCC_PLL1P_Enable();
   LL_RCC_PLL1R_Enable();
@@ -212,7 +212,6 @@ void SystemClock_Config(void)
   LL_Init1msTick(400000000);
 
   LL_SetSystemCoreClock(400000000);
-  LL_RCC_HSE_EnableCSS();
 }
 
 /**
