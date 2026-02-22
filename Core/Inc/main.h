@@ -27,7 +27,6 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32h7xx_ll_dma.h"
 #include "stm32h7xx_ll_rcc.h"
 #include "stm32h7xx_ll_crs.h"
 #include "stm32h7xx_ll_bus.h"
@@ -36,8 +35,8 @@ extern "C" {
 #include "stm32h7xx_ll_cortex.h"
 #include "stm32h7xx_ll_utils.h"
 #include "stm32h7xx_ll_pwr.h"
+#include "stm32h7xx_ll_dma.h"
 #include "stm32h7xx_ll_tim.h"
-#include "stm32h7xx_ll_usart.h"
 #include "stm32h7xx_ll_gpio.h"
 
 #if defined(USE_FULL_ASSERT)
@@ -51,9 +50,6 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-#define SECTION_RAM_D1 __attribute__((section(".RAM_D1"))) /* AHB SRAM (D1 domain): AXI SRAM */
-#define SECTION_RAM_D2 __attribute__((section(".RAM_D2"))) /* AHB SRAM (D2 domain): SRAM1-3 */
-#define SECTION_RAM_D3 __attribute__((section(".RAM_D3"))) /* AHB SRAM (D3 domain): SRAM4 */
 
 /* USER CODE END ET */
 
@@ -64,7 +60,6 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-extern uint8_t DMA1_0_busy;
 
 /* USER CODE END EM */
 
@@ -76,12 +71,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define BTN1_Pin LL_GPIO_PIN_13
-#define BTN1_GPIO_Port GPIOC
-#define LED1_Pin LL_GPIO_PIN_0
-#define LED1_GPIO_Port GPIOB
-#define LED3_Pin LL_GPIO_PIN_14
-#define LED3_GPIO_Port GPIOB
 #define LED2_Pin LL_GPIO_PIN_7
 #define LED2_GPIO_Port GPIOB
 #ifndef NVIC_PRIORITYGROUP_0
