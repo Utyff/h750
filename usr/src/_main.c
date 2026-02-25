@@ -9,7 +9,6 @@
 #include <adc.h>
 #include <dac.h>
 
-//extern I2C_HandleTypeDef hi2c1;
 
 void CORECheck();
 
@@ -34,46 +33,66 @@ void mainInitialize() {
     FPUCheck();
 
     DWT_Init();
-    LCD_Init();
-    LCD_Clear(BLACK);
-    KEYS_init();
+    // LCD_Init();
+    // LCD_Clear(BLACK);
+    // KEYS_init();
 
-    adc1cplt = 0;
-    ADC_start();
+    // adc1cplt = 0;
+    // ADC_start();
 
-    GEN_setParams();
+    // GEN_setParams();
     DAC_startSin();
 
-    HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
+    // HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
 }
 
 u32 ticks =0;
 
 void mainCycle() {
-    if ((random() & 7) < 2) HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+    if ((random() & 7) < 2) GPIOB->ODR ^= LED1_Pin;
 //    getPoint(0, &touchPoint1);
 //    getPoint(1, &touchPoint2);
 
-    drawScreen();
-    KEYS_scan();
+    // drawScreen();
+    // KEYS_scan();
 
-    POINT_COLOR = WHITE;
-    BACK_COLOR = CLR_BACKGROUND;
-    LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
-    LCD_ShowxNum(30, LINE1_Y, (u32) button1Count, 5, 12, 0x0);
+    // POINT_COLOR = WHITE;
+    // BACK_COLOR = CLR_BACKGROUND;
+    // LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
+    // LCD_ShowxNum(30, LINE1_Y, (u32) button1Count, 5, 12, 0x0);
 //    LCD_ShowxNum(60, 214, (u32) ii, 5, 12, 0x01);
 //    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
 //    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
-    POINT_COLOR = MAGENTA;
-    LCD_ShowxNum(0,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
+    // POINT_COLOR = MAGENTA;
+    // LCD_ShowxNum(0,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
 
-    if (adc1cplt != 0) {
-        adc1cplt = 0;
-        ADC_start();
-    }
+    // if (adc1cplt != 0) {
+    //     adc1cplt = 0;
+    //     ADC_start();
+    // }
 
     delay_ms(30);
+}
+
+void UART_Transmit(const char *msg) {
+  static char __ALIGNED(__SCB_DCACHE_LINE_SIZE) SECTION_RAM_D2 txBuffer[250];
+  const uint32_t txBufferSize = strlen(msg);
+
+  while (DMA1_0_busy){}
+  DMA1_0_busy = 1;
+
+  stpcpy(txBuffer, msg);
+  // SCB_CleanDCache_by_Addr((uint32_t*)txBuffer, (int32_t)txBufferSize);
+
+  // Stream 0 = TX
+  LL_DMA_ConfigAddresses(DMA1,
+                         LL_DMA_STREAM_0,
+                         (uint32_t) txBuffer,
+                         LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_TRANSMIT),
+                         LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_STREAM_0));
+  LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, txBufferSize);
+  LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_0);
 }
 
 #ifdef DEBUG_TRACE_SWO

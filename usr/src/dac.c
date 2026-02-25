@@ -74,7 +74,7 @@ void DAC_startSin() {
     for(int i=0; i<32; i++) {
         sin32_2[i] = (sin32[i]>>4);
     }
-    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+    // HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
 
     /*##-2- Enable DAC selected channel and associated DMA #############################*/
     /* Set DMA transfer addresses of source and destination */
