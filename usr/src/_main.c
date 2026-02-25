@@ -8,7 +8,6 @@
 #include <generator.h>
 #include <adc.h>
 #include <dac.h>
-#include "ft6x36.h"
 
 //extern I2C_HandleTypeDef hi2c1;
 
@@ -38,8 +37,6 @@ void mainInitialize() {
     LCD_Init();
     LCD_Clear(BLACK);
     KEYS_init();
-
-//    FT6x36(&hi2c1);
 
     adc1cplt = 0;
     ADC_start();
