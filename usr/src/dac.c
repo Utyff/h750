@@ -1,7 +1,5 @@
 #include <_main.h>
 
-extern DAC_HandleTypeDef hdac1;
-
 const uint16_t sin32[] = {
         0,
         40,
@@ -40,6 +38,38 @@ const uint16_t sin32[] = {
 uint8_t sin32_2[32] = {
 };
 
+
+void Activate_DAC(void)
+{
+    __IO uint32_t wait_loop_index = 0;
+
+    /* Enable DAC channel */
+    LL_DAC_Enable(DAC1, LL_DAC_CHANNEL_1);
+
+    /* Delay for DAC channel voltage settling time from DAC channel startup.    */
+    /* Compute number of CPU cycles to wait for, from delay in us.              */
+    /* Note: Variable divided by 2 to compensate partially                      */
+    /*       CPU processing cycles (depends on compilation optimization).       */
+    /* Note: If system core clock frequency is below 200kHz, wait time          */
+    /*       is only a few CPU processing cycles.                               */
+    wait_loop_index = ((LL_DAC_DELAY_STARTUP_VOLTAGE_SETTLING_US * (SystemCoreClock / (100000 * 2))) / 10);
+    while(wait_loop_index != 0)
+    {
+        wait_loop_index--;
+    }
+
+    /* Enable DAC channel trigger */
+    /* Note: DAC channel conversion can start from trigger enable:              */
+    /*       - if DAC channel trigger source is set to SW:                      */
+    /*         DAC channel conversion will start after trig order               */
+    /*         using function "LL_DAC_TrigSWConversion()".                      */
+    /*       - if DAC channel trigger source is set to external trigger         */
+    /*         (timer, ...):                                                    */
+    /*         DAC channel conversion can start immediately                     */
+    /*         (after next trig order from external trigger)                    */
+    LL_DAC_EnableTrigger(DAC1, LL_DAC_CHANNEL_1);
+}
+
 void DAC_startSin() {
     for(int i=0; i<32; i++) {
         sin32_2[i] = (sin32[i]>>4);
@@ -47,7 +77,20 @@ void DAC_startSin() {
     HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
 
     /*##-2- Enable DAC selected channel and associated DMA #############################*/
-    if (HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t *)sin32_2, 32, DAC_ALIGN_8B_R) != HAL_OK) {
-        Error_Handler();
-    }
+    /* Set DMA transfer addresses of source and destination */
+    LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_0,
+                           (uint32_t)&sin32_2,
+                           LL_DAC_DMA_GetRegAddr(DAC1, LL_DAC_CHANNEL_1, LL_DAC_DMA_REG_DATA_12BITS_RIGHT_ALIGNED),
+                           LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    /* Set DMA transfer size */
+    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, 32);
+    /* Enable DMA transfer interruption: transfer error */
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_0);
+    LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_0);
+    LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_0);
+
+    Activate_DAC();
+    // if (HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t *)sin32_2, 32, DAC_ALIGN_8B_R) != HAL_OK) {
+    //     Error_Handler();
+    // }
 }

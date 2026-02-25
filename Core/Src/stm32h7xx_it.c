@@ -56,7 +56,6 @@
 
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc1;
-extern DMA_HandleTypeDef hdma_dac1_ch1;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -206,9 +205,27 @@ void SysTick_Handler(void)
 void DMA1_Stream0_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream0_IRQn 0 */
+    static uint32_t cntDMA1_0T = 0;
+    static uint32_t cntDMA1_0H = 0;
+    static uint32_t cntDMA1_0E = 0;
+    static uint32_t cntDMA1_0O = 0;
 
+    if (LL_DMA_IsActiveFlag_TC0(DMA1)) {
+        cntDMA1_0T++;
+        LL_DMA_ClearFlag_TC0(DMA1);
+        // dma1TXDoneCallback();
+    } else if (LL_DMA_IsActiveFlag_HT0(DMA1)) {
+        cntDMA1_0H++;
+        LL_DMA_ClearFlag_HT0(DMA1);
+    } else if (LL_DMA_IsActiveFlag_TE0(DMA1)) {
+        cntDMA1_0E++;
+        LL_DMA_ClearFlag_TE0(DMA1);
+        // uart1DMAErrorCallback();
+    } else {
+        cntDMA1_0O++;
+        //Do something
+    }
   /* USER CODE END DMA1_Stream0_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_dac1_ch1);
   /* USER CODE BEGIN DMA1_Stream0_IRQn 1 */
 
   /* USER CODE END DMA1_Stream0_IRQn 1 */
