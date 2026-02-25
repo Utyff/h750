@@ -238,8 +238,28 @@ void DMA1_Stream0_IRQHandler(void)
 void DMA1_Stream7_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream7_IRQn 0 */
-  static uint32_t cntDMA1 =0;
-  cntDMA1++;
+    /* USER CODE BEGIN DMA1_Stream0_IRQn 0 */
+    static uint32_t cntDMA1_7T = 0;
+    static uint32_t cntDMA1_7H = 0;
+    static uint32_t cntDMA1_7E = 0;
+    static uint32_t cntDMA1_7O = 0;
+
+    if (LL_DMA_IsActiveFlag_TC7(DMA1)) {
+        cntDMA1_7T++;
+        DMA1_0_busy = 0;
+        LL_DMA_ClearFlag_TC7(DMA1);
+        // dma1TXDoneCallback();
+    } else if (LL_DMA_IsActiveFlag_HT7(DMA1)) {
+        cntDMA1_7H++;
+        LL_DMA_ClearFlag_HT7(DMA1);
+    } else if (LL_DMA_IsActiveFlag_TE7(DMA1)) {
+        cntDMA1_7E++;
+        LL_DMA_ClearFlag_TE7(DMA1);
+        // uart1DMAErrorCallback();
+    } else {
+        cntDMA1_7O++;
+        //Do something
+    }
   /* USER CODE END DMA1_Stream7_IRQn 0 */
   /* USER CODE BEGIN DMA1_Stream7_IRQn 1 */
 

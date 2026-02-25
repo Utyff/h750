@@ -63,12 +63,6 @@ static void MX_TIM3_Init(void);
 #define BUFLEN (32)
 uint16_t __ALIGNED(4) SECTION_RAM_D2 dmabuf[BUFLEN];
 
-// __IO   uint32_t DMA_TransferErrorFlag = 0;
-// static void HAL_TransferError(DMA_HandleTypeDef *hdma)
-// {
-//     DMA_TransferErrorFlag = 1;
-// }
-
 /* USER CODE END 0 */
 
 /**
@@ -132,16 +126,28 @@ int main(void)
   for(int i=0; i<BUFLEN; i++) {
       dmabuf[i] = i;
   }
+  SCB_CleanDCache_by_Addr( (uint32_t*)dmabuf, BUFLEN);
+
+  //// DMA1 Stream 7
+  LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_7);
+  LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_7);
+  LL_DMA_ConfigAddresses(DMA1,
+                       LL_DMA_STREAM_7,
+                       (uint32_t) dmabuf,
+                       (uint32_t)&GPIOE->ODR,
+                       LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_STREAM_7));
+  LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_7, BUFLEN);
+  LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_7);
 
   LL_TIM_EnableCounter(TIM3);
   LL_TIM_CC_EnableChannel(TIM3, LL_TIM_CHANNEL_CH2);
+  LL_TIM_EnableDMAReq_CC2(TIM3);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
+  // ReSharper disable once CppDFAEndlessLoop
   while (1)
   {
       mainCycle();
@@ -149,7 +155,6 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
   }
-#pragma clang diagnostic pop
   /* USER CODE END 3 */
 }
 
@@ -457,12 +462,10 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
+  // ReSharper disable once CppDFAEndlessLoop
   while (1)
   {
   }
-#pragma clang diagnostic pop
   /* USER CODE END Error_Handler_Debug */
 }
 #ifdef USE_FULL_ASSERT
