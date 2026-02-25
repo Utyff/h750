@@ -250,14 +250,17 @@ static void MX_TIM3_Init(void)
   LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_STREAM_7, LL_DMA_MEMORY_INCREMENT);
   LL_DMA_SetPeriphSize(DMA1, LL_DMA_STREAM_7, LL_DMA_PDATAALIGN_HALFWORD);
   LL_DMA_SetMemorySize(DMA1, LL_DMA_STREAM_7, LL_DMA_MDATAALIGN_HALFWORD);
-  LL_DMA_DisableFifoMode(DMA1, LL_DMA_STREAM_7);
+  LL_DMA_EnableFifoMode(DMA1, LL_DMA_STREAM_7);
+  LL_DMA_SetFIFOThreshold(DMA1, LL_DMA_STREAM_7, LL_DMA_FIFOTHRESHOLD_1_2);
+  LL_DMA_SetMemoryBurstxfer(DMA1, LL_DMA_STREAM_7, LL_DMA_MBURST_SINGLE);
+  LL_DMA_SetPeriphBurstxfer(DMA1, LL_DMA_STREAM_7, LL_DMA_PBURST_SINGLE);
 
   /* USER CODE BEGIN TIM3_Init 1 */
 
   /* USER CODE END TIM3_Init 1 */
   TIM_InitStruct.Prescaler = 1;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 2;
+  TIM_InitStruct.Autoreload = 1;
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
   LL_TIM_Init(TIM3, &TIM_InitStruct);
   LL_TIM_DisableARRPreload(TIM3);
