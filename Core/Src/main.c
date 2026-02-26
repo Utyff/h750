@@ -78,7 +78,7 @@ int main(void)
   /* Enable the CPU Cache */
 
   /* Enable I-Cache---------------------------------------------------------*/
-  // SCB_EnableICache();
+  SCB_EnableICache();
 
   /* MCU Configuration--------------------------------------------------------*/
 

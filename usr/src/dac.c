@@ -75,19 +75,26 @@ void DAC_startSin() {
         sin32_2[i] = (sin32[i]>>4);
     }
     // HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+    /* Start tim4 ch1 */
+    /* Enable output channel 1 */
+    LL_TIM_CC_EnableChannel(TIM4, LL_TIM_CHANNEL_CH1);
+    /* Enable counter */
+    LL_TIM_EnableCounter(TIM4);
+    /* Force update generation */
+    LL_TIM_GenerateEvent_UPDATE(TIM4);
 
     /*##-2- Enable DAC selected channel and associated DMA #############################*/
     /* Set DMA transfer addresses of source and destination */
-    LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_0,
+    LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_2,
                            (uint32_t)&sin32_2,
                            LL_DAC_DMA_GetRegAddr(DAC1, LL_DAC_CHANNEL_1, LL_DAC_DMA_REG_DATA_12BITS_RIGHT_ALIGNED),
                            LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
     /* Set DMA transfer size */
-    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, 32);
+    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, 32);
     /* Enable DMA transfer interruption: transfer error */
-    LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_0);
-    LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_0);
-    LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_0);
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_2);
+    LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_2);
+    LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 
     Activate_DAC();
     // if (HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t *)sin32_2, 32, DAC_ALIGN_8B_R) != HAL_OK) {

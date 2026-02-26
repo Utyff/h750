@@ -35,7 +35,7 @@ void mainInitialize() {
     DWT_Init();
     // LCD_Init();
     // LCD_Clear(BLACK);
-    // KEYS_init();
+    KEYS_init();
 
     // adc1cplt = 0;
     // ADC_start();
