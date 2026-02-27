@@ -20,6 +20,13 @@ static uint16_t debounceCnt = 0;
 
 
 void KEYS_init() {
+    /* Start ENCODER_TIM */
+    /* Enable output channel 1,2 */
+    LL_TIM_CC_EnableChannel(ENCODER_TIM, LL_TIM_CHANNEL_CH1);
+    LL_TIM_CC_EnableChannel(ENCODER_TIM, LL_TIM_CHANNEL_CH2);
+    /* Enable counter */
+    LL_TIM_EnableCounter(ENCODER_TIM);
+
     ENCODER_TIM->CNT = MID_ENCODER;
 }
 
@@ -65,12 +72,12 @@ void KEYS_scan() {
     DBG_Trace(buf);
 
     // choose type of encoder action
-    uint8_t action = button1Count % MAX_ACTIONS;
+    /*uint8_t action = button1Count % MAX_ACTIONS;
     if (action == 0) {
         ADC_step(step);
     } else if (action == 1) {
         GEN_step(step);
-    } /*else {
+    } else {
         DAC_NextGeneratorSignal();
     } //*/
 }

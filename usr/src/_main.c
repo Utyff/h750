@@ -54,7 +54,7 @@ void mainCycle() {
 //    getPoint(1, &touchPoint2);
 
     // drawScreen();
-    // KEYS_scan();
+    KEYS_scan();
 
     // POINT_COLOR = WHITE;
     // BACK_COLOR = CLR_BACKGROUND;
