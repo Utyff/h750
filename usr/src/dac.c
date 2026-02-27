@@ -68,6 +68,12 @@ void Activate_DAC(void)
     /*         DAC channel conversion can start immediately                     */
     /*         (after next trig order from external trigger)                    */
     LL_DAC_EnableTrigger(DAC1, LL_DAC_CHANNEL_1);
+
+    /* Enable DAC channel DMA request */
+    LL_DAC_EnableDMAReq(DAC1, LL_DAC_CHANNEL_1);
+
+    /* Enable interruption DAC channel1 underrun */
+    LL_DAC_EnableIT_DMAUDR1(DAC1);
 }
 
 void DAC_startSin() {
@@ -87,7 +93,7 @@ void DAC_startSin() {
     /* Set DMA transfer addresses of source and destination */
     LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_2,
                            (uint32_t)&sin32_2,
-                           LL_DAC_DMA_GetRegAddr(DAC1, LL_DAC_CHANNEL_1, LL_DAC_DMA_REG_DATA_12BITS_RIGHT_ALIGNED),
+                           LL_DAC_DMA_GetRegAddr(DAC1, LL_DAC_CHANNEL_1, LL_DAC_DMA_REG_DATA_8BITS_RIGHT_ALIGNED),
                            LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
     /* Set DMA transfer size */
     LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, 32);
