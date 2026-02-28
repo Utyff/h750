@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32h7xx_ll_adc.h"
 #include "stm32h7xx_ll_dac.h"
 #include "stm32h7xx_ll_dma.h"
 #include "stm32h7xx_ll_rcc.h"

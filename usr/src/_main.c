@@ -38,7 +38,7 @@ void mainInitialize() {
     KEYS_init();
 
     // adc1cplt = 0;
-    // ADC_start();
+    ADC_start();
 
     // GEN_setParams();
     DAC_startSin();

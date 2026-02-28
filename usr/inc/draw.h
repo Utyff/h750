@@ -1,5 +1,5 @@
-#ifndef F7_FMC_DRAW_H
-#define F7_FMC_DRAW_H
+#ifndef H750_DRAW_H
+#define H750_DRAW_H
 
 #define CLR_BACKGROUND BLACK
 #define CLR_CH1 BLUE
@@ -9,4 +9,4 @@
 void drawFrame();
 void drawScreen();
 
-#endif //F7_FMC_DRAW_H
+#endif //H750_DRAW_H
