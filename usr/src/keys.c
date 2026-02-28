@@ -21,10 +21,8 @@ static uint16_t debounceCnt = 0;
 
 void KEYS_init() {
     /* Start ENCODER_TIM */
-    /* Enable output channel 1,2 */
     LL_TIM_CC_EnableChannel(ENCODER_TIM, LL_TIM_CHANNEL_CH1);
     LL_TIM_CC_EnableChannel(ENCODER_TIM, LL_TIM_CHANNEL_CH2);
-    /* Enable counter */
     LL_TIM_EnableCounter(ENCODER_TIM);
 
     ENCODER_TIM->CNT = MID_ENCODER;

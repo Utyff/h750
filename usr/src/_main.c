@@ -42,8 +42,6 @@ void mainInitialize() {
 
     // GEN_setParams();
     DAC_startSin();
-
-    // HAL_TIM_Encoder_Start(&htim8, TIM_CHANNEL_1);
 }
 
 u32 ticks =0;

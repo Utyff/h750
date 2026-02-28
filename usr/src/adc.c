@@ -68,8 +68,21 @@ void ADC_start() {
 
     ADC1_Init();
 
+    // Set DMA transfer addresses of source and destination
+    LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_1,
+                           ADC1->DR,
+                           (uint32_t)&samplesBuffer,
+                           LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    // Set DMA transfer size
+    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_1, BUF_SIZE);
+    // Enable DMA transfer interruption: transfer error
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_1);
+    LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_1);
+    LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_1);
+
     // LL_ADC_EnableInternalRegulator(ADC1);
     LL_ADC_Enable(ADC1);
+    LL_ADC_REG_StartConversion(ADC1);
 
     ADCStartTick = DWT_Get_Current_Tick();
 }

@@ -41,8 +41,6 @@ uint8_t sin32_2[32] = {
 
 void Activate_DAC(void)
 {
-    __IO uint32_t wait_loop_index = 0;
-
     /* Enable DAC channel */
     LL_DAC_Enable(DAC1, LL_DAC_CHANNEL_1);
 
@@ -52,12 +50,16 @@ void Activate_DAC(void)
     /*       CPU processing cycles (depends on compilation optimization).       */
     /* Note: If system core clock frequency is below 200kHz, wait time          */
     /*       is only a few CPU processing cycles.                               */
-    wait_loop_index = ((LL_DAC_DELAY_STARTUP_VOLTAGE_SETTLING_US * (SystemCoreClock / (100000 * 2))) / 10);
+    __IO uint32_t wait_loop_index = ((LL_DAC_DELAY_STARTUP_VOLTAGE_SETTLING_US * (SystemCoreClock / (100000 * 2))) / 10);
     while(wait_loop_index != 0)
     {
         wait_loop_index--;
     }
 
+    /* Enable DAC channel DMA request */
+    LL_DAC_EnableDMAReq(DAC1, LL_DAC_CHANNEL_1);
+    /* Enable interruption DAC channel1 underrun */
+    LL_DAC_EnableIT_DMAUDR1(DAC1);
     /* Enable DAC channel trigger */
     /* Note: DAC channel conversion can start from trigger enable:              */
     /*       - if DAC channel trigger source is set to SW:                      */
@@ -68,12 +70,6 @@ void Activate_DAC(void)
     /*         DAC channel conversion can start immediately                     */
     /*         (after next trig order from external trigger)                    */
     LL_DAC_EnableTrigger(DAC1, LL_DAC_CHANNEL_1);
-
-    /* Enable DAC channel DMA request */
-    LL_DAC_EnableDMAReq(DAC1, LL_DAC_CHANNEL_1);
-
-    /* Enable interruption DAC channel1 underrun */
-    LL_DAC_EnableIT_DMAUDR1(DAC1);
 }
 
 void DAC_startSin() {
