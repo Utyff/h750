@@ -230,37 +230,6 @@ void DMA1_Stream0_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles DMA1 stream1 global interrupt.
-  */
-void DMA1_Stream1_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Stream1_IRQn 0 */
-    static uint32_t cntDMA1_1T = 0;
-    static uint32_t cntDMA1_1H = 0;
-    static uint32_t cntDMA1_1E = 0;
-    static uint32_t cntDMA1_1O = 0;
-
-    if (LL_DMA_IsActiveFlag_TC1(DMA1)) {
-        cntDMA1_1T++;
-        LL_DMA_ClearFlag_TC1(DMA1);
-    } else if (LL_DMA_IsActiveFlag_HT1(DMA1)) {
-        cntDMA1_1H++;
-        LL_DMA_ClearFlag_HT1(DMA1);
-    } else if (LL_DMA_IsActiveFlag_TE1(DMA1)) {
-        cntDMA1_1E++;
-        LL_DMA_ClearFlag_TE1(DMA1);
-    } else {
-        cntDMA1_1O++;
-        //Do something
-    }
-
-  /* USER CODE END DMA1_Stream1_IRQn 0 */
-  /* USER CODE BEGIN DMA1_Stream1_IRQn 1 */
-
-  /* USER CODE END DMA1_Stream1_IRQn 1 */
-}
-
-/**
   * @brief This function handles DMA1 stream2 global interrupt.
   */
 void DMA1_Stream2_IRQHandler(void)
@@ -289,6 +258,39 @@ void DMA1_Stream2_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Stream2_IRQn 1 */
 
   /* USER CODE END DMA1_Stream2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles ADC1 and ADC2 global interrupts.
+  */
+void ADC_IRQHandler(void)
+{
+  /* USER CODE BEGIN ADC_IRQn 0 */
+    static uint32_t cntADC1RDY = 0;
+    static uint32_t cntADC1EOC = 0;
+    static uint32_t cntADC1EOS = 0;
+    static uint32_t cntADC1OVR = 0;
+    static uint32_t cntADC1O = 0;
+
+    if (LL_ADC_IsActiveFlag_ADRDY(ADC1)) {
+        cntADC1RDY++;
+        LL_ADC_ClearFlag_ADRDY(ADC1);
+    } else if (LL_ADC_IsActiveFlag_EOC(ADC1)) {
+        cntADC1EOC++;
+        LL_ADC_ClearFlag_EOC(ADC1);
+    } else if (LL_ADC_IsActiveFlag_EOS(ADC1)) {
+        cntADC1EOS++;
+        LL_ADC_ClearFlag_EOS(ADC1);
+    } else if (LL_ADC_IsActiveFlag_OVR(ADC1)) {
+        cntADC1OVR++;
+        LL_ADC_ClearFlag_OVR(ADC1);
+    } else {
+        cntADC1O++;
+    }
+  /* USER CODE END ADC_IRQn 0 */
+  /* USER CODE BEGIN ADC_IRQn 1 */
+
+  /* USER CODE END ADC_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
