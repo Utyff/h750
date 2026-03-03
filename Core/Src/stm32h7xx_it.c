@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
+#include <DataBuffer.h>
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
@@ -57,7 +58,10 @@ uint8_t DMA1_0_busy;
 /* External variables --------------------------------------------------------*/
 
 /* USER CODE BEGIN EV */
-
+#define ISR_ARR_SIZE 32
+uint32_t regISR[ISR_ARR_SIZE];
+uint32_t i_ISR_ARR_SIZE = 0;
+uint32_t iSampl = 0;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -272,12 +276,17 @@ void ADC_IRQHandler(void)
     static uint32_t cntADC1OVR = 0;
     static uint32_t cntADC1O = 0;
 
+    if (i_ISR_ARR_SIZE<ISR_ARR_SIZE) { regISR[i_ISR_ARR_SIZE++] = READ_REG(ADC1->ISR); }
+
     if (LL_ADC_IsActiveFlag_ADRDY(ADC1)) {
         cntADC1RDY++;
         LL_ADC_ClearFlag_ADRDY(ADC1);
     } else if (LL_ADC_IsActiveFlag_EOC(ADC1)) {
         cntADC1EOC++;
         LL_ADC_ClearFlag_EOC(ADC1);
+
+        samplesBuffer[iSampl++] = ADC1->DR;
+        if (iSampl >= BUF_SIZE) iSampl = 0;
     } else if (LL_ADC_IsActiveFlag_EOS(ADC1)) {
         cntADC1EOS++;
         LL_ADC_ClearFlag_EOS(ADC1);

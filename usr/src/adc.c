@@ -68,10 +68,13 @@ uint32_t cpltCount = 0;
 void ADC_start() {
 
     LL_ADC_Enable(ADC1);
+    LL_mDelay(2);
+
     LL_ADC_EnableIT_ADRDY(ADC1);
     LL_ADC_EnableIT_EOC(ADC1);
     LL_ADC_EnableIT_EOS(ADC1);
     LL_ADC_EnableIT_OVR(ADC1);
+
     LL_ADC_REG_StartConversion(ADC1);
 
     ADCStartTick = DWT_Get_Current_Tick();
