@@ -59,21 +59,29 @@ uint32_t ADCStartTick;         // time when start ADC buffer fill
 uint32_t ADCHalfElapsedTick;   // the last time half buffer fill
 uint32_t ADCElapsedTick;       // the last time buffer fill
 
-uint32_t halfCount = 0;
-uint32_t cpltCount = 0;
-
 /**
  * Copy of MX_ADC1_Init()
  */
 void ADC_start() {
 
+    if (LL_ADC_REG_IsConversionOngoing(ADC1) != 0UL) {
+        Error_Handler();
+    }
+
     LL_ADC_Enable(ADC1);
     LL_mDelay(2);
 
-    LL_ADC_EnableIT_ADRDY(ADC1);
-    LL_ADC_EnableIT_EOC(ADC1);
-    LL_ADC_EnableIT_EOS(ADC1);
-    LL_ADC_EnableIT_OVR(ADC1);
+    // Set DMA transfer addresses of source and destination
+    LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_1,
+                           (uint32_t) &(ADC1->DR),
+                           (uint32_t)&samplesBuffer,
+                           LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+    // Set DMA transfer size
+    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_1, BUF_SIZE);
+    // Enable DMA transfer interruption: transfer error
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_1);
+    LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_1);
+    LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_1);
 
     LL_ADC_REG_StartConversion(ADC1);
 
