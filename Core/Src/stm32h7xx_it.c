@@ -22,6 +22,7 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "adc.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -241,6 +242,7 @@ void DMA1_Stream1_IRQHandler(void)
     static uint32_t cntDMA1_1O = 0;
 
     if (LL_DMA_IsActiveFlag_TC1(DMA1)) {
+        ADCworks = 0;
         cntDMA1_1T++;
         LL_DMA_ClearFlag_TC1(DMA1);
     } else if (LL_DMA_IsActiveFlag_HT1(DMA1)) {

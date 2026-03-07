@@ -37,8 +37,7 @@ void mainInitialize() {
     // LCD_Clear(BLACK);
     KEYS_init();
 
-    // adc1cplt = 0;
-    ADC_start();
+    ADCworks = 0;
 
     // GEN_setParams();
     DAC_startSin();
@@ -70,7 +69,8 @@ void mainCycle() {
     //     ADC_start();
     // }
 
-    delay_ms(30);
+    ADC_start();
+    delay_ms(100);
 }
 
 void UART_Transmit(const char *msg) {
