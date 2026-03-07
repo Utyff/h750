@@ -140,8 +140,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
+  // ReSharper disable once CppDFAEndlessLoop
   while (1)
   {
       mainCycle();
@@ -150,7 +149,6 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
   }
-#pragma clang diagnostic pop
   /* USER CODE END 3 */
 }
 
@@ -831,12 +829,10 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "EndlessLoop"
+  // ReSharper disable once CppDFAEndlessLoop
   while (1)
   {
   }
-#pragma clang diagnostic pop
   /* USER CODE END Error_Handler_Debug */
 }
 #ifdef USE_FULL_ASSERT

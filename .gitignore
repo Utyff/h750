@@ -6,3 +6,5 @@ cmake-build-debug/
 .mxproject
 .project
 *.jdebug.user
+*.dsl
+.settings
