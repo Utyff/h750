@@ -62,12 +62,10 @@ uint32_t ADCElapsedTick;       // the last time buffer fill
 uint32_t halfCount = 0;
 uint32_t cpltCount = 0;
 
-/**
- * Copy of MX_ADC1_Init()
- */
 void ADC_start() {
 
     LL_ADC_Enable(ADC1);
+    LL_ADC_Enable(ADC2);
     LL_mDelay(2);
 
     LL_ADC_EnableIT_ADRDY(ADC1);

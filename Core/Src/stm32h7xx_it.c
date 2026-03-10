@@ -22,8 +22,8 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "DataBuffer.h"
 /* USER CODE END Includes */
-#include <DataBuffer.h>
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
@@ -286,6 +286,7 @@ void ADC_IRQHandler(void)
         LL_ADC_ClearFlag_EOC(ADC1);
 
         samplesBuffer[iSampl++] = ADC1->DR;
+        samplesBuffer[iSampl++] = ADC2->DR;
         if (iSampl >= BUF_SIZE) iSampl = 0;
     } else if (LL_ADC_IsActiveFlag_EOS(ADC1)) {
         cntADC1EOS++;
