@@ -37,7 +37,7 @@ void mainInitialize() {
     // LCD_Clear(BLACK);
     KEYS_init();
 
-    // adc1cplt = 0;
+    ADCworks = 0;
     for (int i=0; i<BUF_SIZE; i++) { samplesBuffer[i] = i; }
     ADC_start();
 
@@ -88,8 +88,8 @@ void UART_Transmit(const char *msg) {
   LL_DMA_ConfigAddresses(DMA1,
                          LL_DMA_STREAM_0,
                          (uint32_t) txBuffer,
-                         LL_USART_DMA_GetRegAddr(USART1, LL_USART_DMA_REG_DATA_TRANSMIT),
-                         LL_DMA_GetDataTransferDirection(DMA1, LL_DMA_STREAM_0));
+                         (uint32_t) &(USART1->TDR),
+                         LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
   LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_0, txBufferSize);
   LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_0);
 }
