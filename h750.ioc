@@ -2,7 +2,7 @@
 ADC1.Channel-0\#ChannelRegularConversion=ADC_CHANNEL_3
 ADC1.ClockPrescaler=ADC_CLOCK_ASYNC_DIV8
 ADC1.ContinuousConvMode=ENABLE
-ADC1.ConversionDataManagement=ADC_CONVERSIONDATA_DFSDM
+ADC1.ConversionDataManagement=ADC_CONVERSIONDATA_DMA_CIRCULAR
 ADC1.DMAAccessModeView=ENABLE
 ADC1.EOCSelection=ADC_EOC_SEQ_CONV
 ADC1.IPParameters=Rank-0\#ChannelRegularConversion,master,Channel-0\#ChannelRegularConversion,SamplingTime-0\#ChannelRegularConversion,OffsetNumber-0\#ChannelRegularConversion,OffsetSignedSaturation-0\#ChannelRegularConversion,NbrOfConversionFlag,Resolution,ContinuousConvMode,Overrun,ConversionDataManagement,ClockPrescaler,EOCSelection,Mode,TwoSamplingDelay,DMAAccessModeView
@@ -19,7 +19,7 @@ ADC1.master=1
 ADC2.Channel-0\#ChannelRegularConversion=ADC_CHANNEL_3
 ADC2.ClockPrescaler=ADC_CLOCK_ASYNC_DIV8
 ADC2.ContinuousConvMode=ENABLE
-ADC2.ConversionDataManagement=ADC_CONVERSIONDATA_DFSDM
+ADC2.ConversionDataManagement=ADC_CONVERSIONDATA_DR
 ADC2.DMAAccessModeView=ENABLE
 ADC2.EOCSelection=ADC_EOC_SEQ_CONV
 ADC2.IPParameters=Rank-0\#ChannelRegularConversion,ClockPrescaler,Channel-0\#ChannelRegularConversion,SamplingTime-0\#ChannelRegularConversion,OffsetNumber-0\#ChannelRegularConversion,OffsetSignedSaturation-0\#ChannelRegularConversion,NbrOfConversionFlag,Resolution,ContinuousConvMode,EOCSelection,Overrun,Mode,TwoSamplingDelay,DMAAccessModeView,ConversionDataManagement

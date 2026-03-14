@@ -38,7 +38,6 @@ void mainInitialize() {
     KEYS_init();
 
     ADCworks = 0;
-    for (int i=0; i<BUF_SIZE; i++) { samplesBuffer[i] = i; }
     ADC_start();
 
     // GEN_setParams();

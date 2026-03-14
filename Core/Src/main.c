@@ -301,7 +301,7 @@ static void MX_ADC1_Init(void)
   ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
   ADC_REG_InitStruct.Overrun = LL_ADC_REG_OVR_DATA_OVERWRITTEN;
   LL_ADC_REG_Init(ADC1, &ADC_REG_InitStruct);
-  LL_ADC_REG_SetDataTransferMode(ADC1, LL_ADC_REG_DFSDM_TRANSFER);
+  LL_ADC_REG_SetDataTransferMode(ADC1, LL_ADC_REG_DMA_TRANSFER_UNLIMITED);
   ADC_CommonInitStruct.CommonClock = LL_ADC_CLOCK_ASYNC_DIV8;
   ADC_CommonInitStruct.Multimode = LL_ADC_MULTI_DUAL_REG_INTERL;
   ADC_CommonInitStruct.MultiTwoSamplingDelay = LL_ADC_MULTI_TWOSMP_DELAY_2CYCLES_5;
@@ -383,7 +383,7 @@ static void MX_ADC2_Init(void)
   ADC_REG_InitStruct.ContinuousMode = LL_ADC_REG_CONV_CONTINUOUS;
   ADC_REG_InitStruct.Overrun = LL_ADC_REG_OVR_DATA_OVERWRITTEN;
   LL_ADC_REG_Init(ADC2, &ADC_REG_InitStruct);
-  LL_ADC_REG_SetDataTransferMode(ADC2, LL_ADC_REG_DFSDM_TRANSFER);
+  LL_ADC_REG_SetDataTransferMode(ADC2, LL_ADC_REG_DR_TRANSFER);
 
   /* Disable ADC deep power down (enabled by default after reset state) */
   LL_ADC_DisableDeepPowerDown(ADC2);

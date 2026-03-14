@@ -58,10 +58,7 @@ uint8_t DMA1_0_busy;
 /* External variables --------------------------------------------------------*/
 
 /* USER CODE BEGIN EV */
-#define ISR_ARR_SIZE 32
-uint32_t regISR[ISR_ARR_SIZE];
-uint32_t i_ISR_ARR_SIZE = 0;
-uint32_t iSampl = 0;
+
 /* USER CODE END EV */
 
 /******************************************************************************/
