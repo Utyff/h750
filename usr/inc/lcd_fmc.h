@@ -62,5 +62,7 @@ __STATIC_INLINE u16 LCD_ReadReg(vu16 LCD_Reg) {
     return LCD_RD_DATA();       // Return value read
 }
 
+void FMC_Init(void);
+
 
 #endif //_LCD_FMC_H

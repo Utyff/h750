@@ -138,6 +138,7 @@ vu16 lid=0x1234;
 // This initialization function can initialize the various ILI93XX LCD, but the other function is based ILI9320!!!
 // Not been tested on other types of driver chip!
 void LCD_Init(void) {
+    FMC_Init();
 
     delay_ms(10);
     LCD_WR_REG(0X01); // SWRESET
@@ -266,7 +267,7 @@ void LCD_Clear(const u16 color) {
 //    return;
 
     // get start time
-//    u32 t0 = DWT_Get_Current_Tick();
+    u32 t0 = DWT_Get_Current_Tick();
 
     LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);  // set the cursor position
     LCD_WriteRAM_Prepare();                  // start writing GRAM
@@ -276,9 +277,9 @@ void LCD_Clear(const u16 color) {
         LCD_WR_DATA(color);
     }
 
-//    u32 LCDClearTick = DWT_Elapsed_Tick(t0);
-//    POINT_COLOR = YELLOW;
-//    LCD_ShowxNum(100, MAX_Y-13, LCDClearTick / DWT_IN_MICROSEC, 8, 12, 9);
+    u32 LCDClearTick = DWT_Elapsed_Tick(t0);
+    POINT_COLOR = CYAN;
+    LCD_ShowxNum(100, MAX_Y-26, LCDClearTick / DWT_IN_MICROSEC, 8, 12, 9);
 }
 
 // Fill a single color in the designated area

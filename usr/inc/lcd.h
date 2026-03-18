@@ -54,6 +54,7 @@ extern u16 BACK_COLOR;  // Background color
 #define RED          0xF800
 #define MAGENTA      0xF81F
 #define GREEN        0x07E0
+#define DARKGREEN    0x01E0
 #define CYAN         0x7FFF
 #define YELLOW       0xFFE0
 #define BROWN        0XBC40
