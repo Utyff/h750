@@ -8,6 +8,7 @@
 #include <generator.h>
 #include <adc.h>
 #include <dac.h>
+#include "ft6x36.h"
 #include <stm32h7xx_ll_fmc.h>
 #include "stm32h7xx_hal.h"
 
@@ -22,8 +23,8 @@ extern float time;
 const char buildDate[] = __DATE__;
 const char buildTime[] = __TIME__;
 
-//touch_point_t touchPoint1;
-//touch_point_t touchPoint2;
+touch_point_t touchPoint1;
+touch_point_t touchPoint2;
 
 void PLL2_PeriphCommonClock_Config(void)
 {
@@ -81,7 +82,7 @@ void FMC_Init(void) {
 
   __IO uint32_t tmpreg;
   SET_BIT(RCC->AHB3ENR, RCC_AHB3ENR_FMCEN);
-  /* Delay after an RCC peripheral clock enabling */
+  // Delay after an RCC peripheral clock enabling
   tmpreg = READ_BIT(RCC->AHB3ENR, RCC_AHB3ENR_FMCEN);
   UNUSED(tmpreg);
 
@@ -121,8 +122,8 @@ u32 ticks =0;
 
 void mainCycle() {
     if ((random() & 7) < 2) GPIOB->ODR ^= LED1_Pin;
-//    getPoint(0, &touchPoint1);
-//    getPoint(1, &touchPoint2);
+    getPoint(0, &touchPoint1);
+    getPoint(1, &touchPoint2);
 
     // drawScreen();
     KEYS_scan();
