@@ -564,16 +564,6 @@ static void MX_TIM1_Init(void)
   /* Peripheral clock enable */
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
 
-  /* TIM1 interrupt Init */
-  NVIC_SetPriority(TIM1_BRK_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
-  NVIC_EnableIRQ(TIM1_BRK_IRQn);
-  NVIC_SetPriority(TIM1_UP_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
-  NVIC_EnableIRQ(TIM1_UP_IRQn);
-  NVIC_SetPriority(TIM1_TRG_COM_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
-  NVIC_EnableIRQ(TIM1_TRG_COM_IRQn);
-  NVIC_SetPriority(TIM1_CC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
-  NVIC_EnableIRQ(TIM1_CC_IRQn);
-
   /* USER CODE BEGIN TIM1_Init 1 */
 
   /* USER CODE END TIM1_Init 1 */
@@ -612,10 +602,7 @@ static void MX_TIM1_Init(void)
   TIM_BDTRInitStruct.AutomaticOutput = LL_TIM_AUTOMATICOUTPUT_DISABLE;
   LL_TIM_BDTR_Init(TIM1, &TIM_BDTRInitStruct);
   /* USER CODE BEGIN TIM1_Init 2 */
-  LL_TIM_EnableIT_CC1(TIM1);
-  LL_TIM_EnableIT_BRK(TIM1);
-  LL_TIM_EnableIT_UPDATE(TIM1);
-  LL_TIM_EnableIT_TRIG(TIM1);
+
   /* USER CODE END TIM1_Init 2 */
   LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOA);
   /**TIM1 GPIO Configuration
