@@ -279,6 +279,38 @@ void TIM1_CC_IRQHandler(void)
   /* USER CODE END TIM1_CC_IRQn 1 */
 }
 
+/**
+  * @brief This function handles TIM2 global interrupt.
+  */
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+    static uint32_t cntTIM2_CC1 = 0;
+    static uint32_t cntTIM2_TRIG = 0;
+    static uint32_t cntTIM2_UP = 0;
+    static uint32_t cntTIM2_BRK = 0;
+    if (LL_TIM_IsActiveFlag_BRK(TIM2)) {
+        cntTIM2_BRK++;
+        LL_TIM_ClearFlag_BRK(TIM2);
+    } else if (LL_TIM_IsActiveFlag_UPDATE(TIM2)) {
+        cntTIM2_UP++;
+        LL_TIM_ClearFlag_UPDATE(TIM2);
+    } else if (LL_TIM_IsActiveFlag_TRIG(TIM2)) {
+        cntTIM2_TRIG++;
+        LL_TIM_ClearFlag_TRIG(TIM2);
+    } else if (LL_TIM_IsActiveFlag_CC1(TIM2)) {
+        cntTIM2_CC1++;
+        LL_TIM_ClearFlag_CC1(TIM2);
+    } else {
+        static uint32_t cntTIM2_OTHER_ = 0;
+        cntTIM2_OTHER_++;
+    }
+  /* USER CODE END TIM2_IRQn 0 */
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+
+  /* USER CODE END TIM2_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */
