@@ -42,7 +42,7 @@ void mainInitialize() {
     ADCworks = 0;
     ADC_start();
 
-    // GEN_setParams();
+    GEN_setParams();
     DAC_startSin();
 }
 
@@ -53,19 +53,19 @@ void mainCycle() {
     getPoint(0, &touchPoint1);
     getPoint(1, &touchPoint2);
 
-    // drawScreen();
+    drawScreen();
     KEYS_scan();
 
-    // POINT_COLOR = WHITE;
-    // BACK_COLOR = CLR_BACKGROUND;
-    // LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
-    // LCD_ShowxNum(30, LINE1_Y, (u32) button1Count, 5, 12, 0x0);
+    POINT_COLOR = WHITE;
+    BACK_COLOR = CLR_BACKGROUND;
+    LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
+    LCD_ShowxNum(30, LINE1_Y, (u32) button1Count, 5, 12, 0x0);
 //    LCD_ShowxNum(60, 214, (u32) ii, 5, 12, 0x01);
 //    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
 //    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
-    // POINT_COLOR = MAGENTA;
-    // LCD_ShowxNum(0,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
+    POINT_COLOR = MAGENTA;
+    LCD_ShowxNum(0,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);
 
     // if (adc1cplt != 0) {
     //     adc1cplt = 0;

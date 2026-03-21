@@ -291,6 +291,86 @@ void DMA1_Stream2_IRQHandler(void)
   /* USER CODE END DMA1_Stream2_IRQn 1 */
 }
 
+/**
+  * @brief This function handles TIM1 break interrupt.
+  */
+void TIM1_BRK_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_BRK_IRQn 0 */
+  static uint32_t cntTIM1_BRK = 0;
+  if (LL_TIM_IsActiveFlag_BRK(TIM1)) {
+    cntTIM1_BRK++;
+    LL_TIM_ClearFlag_BRK(TIM1);
+  } else {
+      static uint32_t cntTIM1_BRK_ = 0;
+      cntTIM1_BRK_++;
+  }
+  /* USER CODE END TIM1_BRK_IRQn 0 */
+  /* USER CODE BEGIN TIM1_BRK_IRQn 1 */
+
+  /* USER CODE END TIM1_BRK_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM1 update interrupt.
+  */
+void TIM1_UP_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_UP_IRQn 0 */
+    static uint32_t cntTIM1_UP = 0;
+    if (LL_TIM_IsActiveFlag_UPDATE(TIM1)) {
+        cntTIM1_UP++;
+        LL_TIM_ClearFlag_UPDATE(TIM1);
+    } else {
+        static uint32_t cntTIM1_UP_ = 0;
+        cntTIM1_UP_++;
+    }
+  /* USER CODE END TIM1_UP_IRQn 0 */
+  /* USER CODE BEGIN TIM1_UP_IRQn 1 */
+
+  /* USER CODE END TIM1_UP_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM1 trigger and commutation interrupts.
+  */
+void TIM1_TRG_COM_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_TRG_COM_IRQn 0 */
+    static uint32_t cntTIM1_TRIG = 0;
+    if (LL_TIM_IsActiveFlag_TRIG(TIM1)) {
+        cntTIM1_TRIG++;
+        LL_TIM_ClearFlag_TRIG(TIM1);
+    } else {
+        static uint32_t cntTIM1_TRIG_ = 0;
+        cntTIM1_TRIG_++;
+    }
+  /* USER CODE END TIM1_TRG_COM_IRQn 0 */
+  /* USER CODE BEGIN TIM1_TRG_COM_IRQn 1 */
+
+  /* USER CODE END TIM1_TRG_COM_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM1 capture compare interrupt.
+  */
+void TIM1_CC_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_CC_IRQn 0 */
+    static uint32_t cntTIM1_CC1 = 0;
+    if (LL_TIM_IsActiveFlag_CC1(TIM1)) {
+        cntTIM1_CC1++;
+        LL_TIM_ClearFlag_CC1(TIM1);
+    } else {
+        static uint32_t cntTIM1_CC_ = 0;
+        cntTIM1_CC_++;
+    }
+  /* USER CODE END TIM1_CC_IRQn 0 */
+  /* USER CODE BEGIN TIM1_CC_IRQn 1 */
+
+  /* USER CODE END TIM1_CC_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

@@ -76,7 +76,6 @@ void DAC_startSin() {
     for(int i=0; i<32; i++) {
         sin32_2[i] = (sin32[i]>>4);
     }
-    // HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
     /* Start tim4 ch1 */
     /* Enable output channel 1 */
     LL_TIM_CC_EnableChannel(TIM4, LL_TIM_CHANNEL_CH1);
@@ -99,7 +98,4 @@ void DAC_startSin() {
     LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 
     Activate_DAC();
-    // if (HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, (uint32_t *)sin32_2, 32, DAC_ALIGN_8B_R) != HAL_OK) {
-    //     Error_Handler();
-    // }
 }

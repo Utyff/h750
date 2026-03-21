@@ -158,3 +158,7 @@ static void ADC2_Init(void)
   LL_ADC_SetChannelPreselection(ADC2, LL_ADC_CHANNEL_3);
 
 }
+
+void ADC_step(int16_t step) {
+
+}
