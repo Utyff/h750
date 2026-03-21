@@ -22,7 +22,7 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "adc.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -198,98 +198,6 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32h7xx.s).                    */
 /******************************************************************************/
-
-/**
-  * @brief This function handles DMA1 stream0 global interrupt.
-  */
-void DMA1_Stream0_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Stream0_IRQn 0 */
-  static uint32_t cntDMA1_0T = 0;
-  static uint32_t cntDMA1_0H = 0;
-  static uint32_t cntDMA1_0E = 0;
-  static uint32_t cntDMA1_0O = 0;
-
-  if (LL_DMA_IsActiveFlag_TC0(DMA1)) {
-      cntDMA1_0T++;
-      DMA1_0_busy = 0;
-      LL_DMA_ClearFlag_TC0(DMA1);
-  } else if (LL_DMA_IsActiveFlag_HT0(DMA1)) {
-      cntDMA1_0H++;
-      LL_DMA_ClearFlag_HT0(DMA1);
-  } else if (LL_DMA_IsActiveFlag_TE0(DMA1)) {
-      cntDMA1_0E++;
-      LL_DMA_ClearFlag_TE0(DMA1);
-  } else {
-      cntDMA1_0O++;
-      //Do something
-  }
-  /* USER CODE END DMA1_Stream0_IRQn 0 */
-  /* USER CODE BEGIN DMA1_Stream0_IRQn 1 */
-
-  /* USER CODE END DMA1_Stream0_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA1 stream1 global interrupt.
-  */
-void DMA1_Stream1_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Stream1_IRQn 0 */
-    static uint32_t cntDMA1_1T = 0;
-    static uint32_t cntDMA1_1H = 0;
-    static uint32_t cntDMA1_1E = 0;
-    static uint32_t cntDMA1_1O = 0;
-
-    if (LL_DMA_IsActiveFlag_TC1(DMA1)) {
-        ADCworks = 0;
-        cntDMA1_1T++;
-        LL_DMA_ClearFlag_TC1(DMA1);
-    } else if (LL_DMA_IsActiveFlag_HT1(DMA1)) {
-        cntDMA1_1H++;
-        LL_DMA_ClearFlag_HT1(DMA1);
-    } else if (LL_DMA_IsActiveFlag_TE1(DMA1)) {
-        cntDMA1_1E++;
-        LL_DMA_ClearFlag_TE1(DMA1);
-    } else {
-        cntDMA1_1O++;
-    }
-  /* USER CODE END DMA1_Stream1_IRQn 0 */
-  /* USER CODE BEGIN DMA1_Stream1_IRQn 1 */
-
-  /* USER CODE END DMA1_Stream1_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA1 stream2 global interrupt.
-  */
-void DMA1_Stream2_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Stream2_IRQn 0 */
-    static uint32_t cntDMA1_2T = 0;
-    static uint32_t cntDMA1_2H = 0;
-    static uint32_t cntDMA1_2E = 0;
-    static uint32_t cntDMA1_2O = 0;
-
-    if (LL_DMA_IsActiveFlag_TC2(DMA1)) {
-        cntDMA1_2T++;
-        LL_DMA_ClearFlag_TC2(DMA1);
-    } else if (LL_DMA_IsActiveFlag_HT2(DMA1)) {
-        cntDMA1_2H++;
-        LL_DMA_ClearFlag_HT2(DMA1);
-    } else if (LL_DMA_IsActiveFlag_TE2(DMA1)) {
-        cntDMA1_2E++;
-        LL_DMA_ClearFlag_TE2(DMA1);
-        // uart1DMAErrorCallback();
-    } else {
-        cntDMA1_2O++;
-        //Do something
-    }
-  /* USER CODE END DMA1_Stream2_IRQn 0 */
-  /* USER CODE BEGIN DMA1_Stream2_IRQn 1 */
-
-  /* USER CODE END DMA1_Stream2_IRQn 1 */
-}
 
 /**
   * @brief This function handles TIM1 break interrupt.
