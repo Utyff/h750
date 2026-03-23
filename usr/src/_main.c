@@ -64,9 +64,8 @@ void mainCycle() {
     LCD_ShowxNum(0, LINE1_Y, TIM8->CNT, 5, 12, 0x0);
     LCD_ShowxNum(30, LINE1_Y, button1Count, 5, 12, 0x0);
     LCD_ShowxNum(80, LINE1_Y, tim1Freq, 8, 12, 0x0);
+    LCD_ShowxNum(90, LINE2_Y, (u32) ADC_MeasureTime * FRAME_STEP, 7, 12, 0x0);
     LCD_ShowxNum(120, LINE2_Y, (u32) ADC_param, 5, 12, 0x0);
-//    LCD_ShowxNum(90, 214, (u32) time / 10, 5, 12, 0x01);
-//    LCD_ShowxNum(120, 214, (u32) firstHalf, 5, 12, 0x01);
 
     POINT_COLOR = MAGENTA;
     LCD_ShowxNum(200,  LINE2_Y, ADCElapsedTick, 10, 12, 0x0);

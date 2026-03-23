@@ -47,9 +47,8 @@ const GEN_PARAM GEN_Parameters[GEN_Parameters_Size] = {
         {9999, 199, 100}
 };
 
-uint32_t currentGenParam = 4;
-
-uint32_t tim1Prescaler = 99;
+uint32_t currentGenParam = 9;
+uint32_t tim1Prescaler = 9;
 uint32_t tim1Period = 99;
 uint32_t tim1Pulse = 40;
 uint32_t tim1Freq = 0;

@@ -39,7 +39,7 @@ uint8_t sin32_2[32] = {
 };
 
 
-void Activate_DAC(void)
+void DAC_Activate(void)
 {
     /* Enable DAC channel */
     LL_DAC_Enable(DAC1, LL_DAC_CHANNEL_1);
@@ -97,5 +97,5 @@ void DAC_startSin() {
     LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_2);
     LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 
-    Activate_DAC();
+    DAC_Activate();
 }
