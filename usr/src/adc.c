@@ -4,7 +4,7 @@
 #include "adc.h"
 
 // ADC clock freq (Hz)
-#define ADC_CLOCK 100000000
+#define ADC_CLOCK 50000000.f
 // RM0433 page 952
 // 8 bit. TSAR timings depending on resolution
 #define CONV_TICS 4.5f
@@ -70,6 +70,7 @@ static void ADC1_Init(void);
 static void ADC2_Init(void);
 float ADC_calcSampleTime();
 
+
 void ADC_start() {
 
     if (ADCworks != 0) {
@@ -85,16 +86,16 @@ void ADC_start() {
     LL_mDelay(2);
 
     // Set DMA transfer addresses of source and destination
-    LL_DMA_ConfigAddresses(DMA1, LL_DMA_STREAM_1,
+    LL_DMA_ConfigAddresses(DMA2, LL_DMA_STREAM_0,
                            (uint32_t) &(ADC12_COMMON->CDR),
                            (uint32_t)&samplesBuffer,
                            LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
     // Set DMA transfer size
-    LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_1, BUF_SIZE/2);
+    LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_0, BUF_SIZE/2);
     // Enable DMA transfer interruption: transfer error
-    LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_1);
-    LL_DMA_EnableIT_TE(DMA1, LL_DMA_STREAM_1);
-    LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_1);
+    LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_0);
+    LL_DMA_EnableIT_TE(DMA2, LL_DMA_STREAM_0);
+    LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_0);
 
     LL_ADC_REG_StartConversion(ADC1);
 
@@ -109,15 +110,15 @@ static void ADC1_Init(void) {
   LL_ADC_Disable(ADC2);
 
   // ADC1 DMA Init
-  LL_DMA_SetPeriphRequest(DMA1, LL_DMA_STREAM_1, LL_DMAMUX1_REQ_ADC1);
-  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_STREAM_1, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-  LL_DMA_SetStreamPriorityLevel(DMA1, LL_DMA_STREAM_1, LL_DMA_PRIORITY_VERYHIGH);
-  LL_DMA_SetMode(DMA1, LL_DMA_STREAM_1, LL_DMA_MODE_NORMAL);
-  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_STREAM_1, LL_DMA_PERIPH_NOINCREMENT);
-  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_STREAM_1, LL_DMA_MEMORY_INCREMENT);
-  LL_DMA_SetPeriphSize(DMA1, LL_DMA_STREAM_1, LL_DMA_PDATAALIGN_HALFWORD);
-  LL_DMA_SetMemorySize(DMA1, LL_DMA_STREAM_1, LL_DMA_MDATAALIGN_HALFWORD);
-  LL_DMA_DisableFifoMode(DMA1, LL_DMA_STREAM_1);
+  LL_DMA_SetPeriphRequest(DMA2, LL_DMA_STREAM_0, LL_DMAMUX1_REQ_ADC1);
+  LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_STREAM_0, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+  LL_DMA_SetStreamPriorityLevel(DMA2, LL_DMA_STREAM_0, LL_DMA_PRIORITY_VERYHIGH);
+  LL_DMA_SetMode(DMA2, LL_DMA_STREAM_0, LL_DMA_MODE_NORMAL);
+  LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_STREAM_0, LL_DMA_PERIPH_NOINCREMENT);
+  LL_DMA_SetMemoryIncMode(DMA2, LL_DMA_STREAM_0, LL_DMA_MEMORY_INCREMENT);
+  LL_DMA_SetPeriphSize(DMA2, LL_DMA_STREAM_0, LL_DMA_PDATAALIGN_HALFWORD);
+  LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_0, LL_DMA_MDATAALIGN_HALFWORD);
+  LL_DMA_DisableFifoMode(DMA2, LL_DMA_STREAM_0);
 
   MODIFY_REG(ADC1->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B);
   // Common config
@@ -140,8 +141,7 @@ static void ADC1_Init(void) {
 
 }
 
-static void ADC2_Init(void)
-{
+static void ADC2_Init(void) {
 
   /** Common config */
   LL_ADC_SetOverSamplingScope(ADC2, LL_ADC_OVS_DISABLE);
@@ -162,30 +162,6 @@ static void ADC2_Init(void)
 
 }
 
-void ADC_step_up() {
-    if (ScreenTime_adj < 9)
-        ScreenTime_adj++;
-    else if (ScreenTime < sizeof(ScreenTimes) / sizeof(ScreenTimes[0]) - 2) // last value forbidden to assign
-        ScreenTime_adj = 0, ScreenTime++;
-}
-
-
-void ADC_step_down() {
-    if (ScreenTime_adj > 0)
-        ScreenTime_adj--;
-    else if (ScreenTime > 0)
-        ScreenTime_adj = 9, ScreenTime--;
-}
-
-
-float ADC_getTime() {
-    float time = ScreenTimes[ScreenTime];
-    // next time always exist because last forbidden to assign
-    float adj = (ScreenTimes[ScreenTime + 1] - time) * ScreenTime_adj / 10;
-    time += adj;
-    return time;
-}
-
 
 void ADC_step(int16_t step) {
     if (step == 0) return;
@@ -199,9 +175,9 @@ void ADC_step(int16_t step) {
     ADC_MeasureTime = ADC_calcSampleTime();
 }
 
-// return time for 1 meguring. (us)
+// return time for 1 measuring. (ns)
 float ADC_calcSampleTime() {
-    uint32_t presc = 0;
+    float presc = 0;
     float sampling = 0;
 
     switch (ADC_Prescaler) {
@@ -274,5 +250,5 @@ float ADC_calcSampleTime() {
             Error_Handler();
     }
 
-    return (CONV_TICS + sampling) * 1/(ADC_CLOCK/presc /1000000) * 1000 ;
+    return (CONV_TICS + sampling) * 1/(ADC_CLOCK/presc /1000000.f) * 1000.f /2.f ;
 }
