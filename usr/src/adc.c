@@ -67,7 +67,6 @@ uint32_t ADCHalfElapsedTick;   // the last time half buffer fill
 uint32_t ADCElapsedTick;       // the last time buffer fill
 
 static void ADC1_Init(void);
-static void ADC2_Init(void);
 float ADC_calcSampleTime();
 
 
@@ -79,23 +78,14 @@ void ADC_start() {
     ADCworks = 1;
 
     ADC1_Init();
-    ADC2_Init();
 
     LL_ADC_Enable(ADC1);
-    LL_ADC_Enable(ADC2);
     LL_mDelay(2);
 
-    // Set DMA transfer addresses of source and destination
-    LL_DMA_ConfigAddresses(DMA2, LL_DMA_STREAM_0,
-                           (uint32_t) &(ADC12_COMMON->CDR),
-                           (uint32_t)&samplesBuffer,
-                           LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-    // Set DMA transfer size
-    LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_0, BUF_SIZE/2);
-    // Enable DMA transfer interruption: transfer error
-    LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_0);
-    LL_DMA_EnableIT_TE(DMA2, LL_DMA_STREAM_0);
-    LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_0);
+    LL_ADC_EnableIT_ADRDY(ADC1);
+    LL_ADC_EnableIT_EOC(ADC1);
+    LL_ADC_EnableIT_EOS(ADC1);
+    LL_ADC_EnableIT_OVR(ADC1);
 
     LL_ADC_REG_StartConversion(ADC1);
 
@@ -107,25 +97,8 @@ static void ADC1_Init(void) {
 
   LL_ADC_REG_StopConversion(ADC1);
   LL_ADC_Disable(ADC1);
-  LL_ADC_Disable(ADC2);
-
-  // ADC1 DMA Init
-  LL_DMA_SetPeriphRequest(DMA2, LL_DMA_STREAM_0, LL_DMAMUX1_REQ_ADC1);
-  LL_DMA_SetDataTransferDirection(DMA2, LL_DMA_STREAM_0, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-  LL_DMA_SetStreamPriorityLevel(DMA2, LL_DMA_STREAM_0, LL_DMA_PRIORITY_VERYHIGH);
-  LL_DMA_SetMode(DMA2, LL_DMA_STREAM_0, LL_DMA_MODE_NORMAL);
-  LL_DMA_SetPeriphIncMode(DMA2, LL_DMA_STREAM_0, LL_DMA_PERIPH_NOINCREMENT);
-  LL_DMA_SetMemoryIncMode(DMA2, LL_DMA_STREAM_0, LL_DMA_MEMORY_INCREMENT);
-  LL_DMA_SetPeriphSize(DMA2, LL_DMA_STREAM_0, LL_DMA_PDATAALIGN_HALFWORD);
-  LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_0, LL_DMA_MDATAALIGN_HALFWORD);
-  LL_DMA_DisableFifoMode(DMA2, LL_DMA_STREAM_0);
 
   MODIFY_REG(ADC1->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B);
-  // Common config
-  MODIFY_REG(ADC12_COMMON->CCR,
-             ADC_CCR_CKMODE | ADC_CCR_PRESC | ADC_CCR_DUAL | ADC_CCR_DAMDF | ADC_CCR_DELAY,
-             ADC_Prescaler | LL_ADC_MULTI_DUAL_REG_INTERL | LL_ADC_MULTI_REG_DMA_RES_8B
-  );
 
   /* Disable ADC deep power down (enabled by default after reset state) */
   LL_ADC_DisableDeepPowerDown(ADC1);
@@ -138,28 +111,6 @@ static void ADC1_Init(void) {
   LL_ADC_SetChannelSamplingTime(ADC1, LL_ADC_CHANNEL_3, ADC_SampleTime);
   LL_ADC_SetChannelSingleDiff(ADC1, LL_ADC_CHANNEL_3, LL_ADC_SINGLE_ENDED);
   LL_ADC_SetChannelPreselection(ADC1, LL_ADC_CHANNEL_3);
-
-}
-
-static void ADC2_Init(void) {
-
-  /** Common config */
-  LL_ADC_SetOverSamplingScope(ADC2, LL_ADC_OVS_DISABLE);
-  MODIFY_REG(ADC2->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B);
-  LL_ADC_REG_SetDataTransferMode(ADC2, LL_ADC_REG_DMA_TRANSFER_UNLIMITED);
-
-  /* Disable ADC deep power down (enabled by default after reset state) */
-  LL_ADC_DisableDeepPowerDown(ADC2);
-  /* Enable ADC internal voltage regulator */
-  LL_ADC_EnableInternalRegulator(ADC2);
-  LL_mDelay(LL_ADC_DELAY_INTERNAL_REGUL_STAB_US);
-
-  // Configure Regular Channel
-  LL_ADC_REG_SetSequencerRanks(ADC2, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_3);
-  LL_ADC_SetChannelSamplingTime(ADC2, LL_ADC_CHANNEL_3, ADC_SampleTime);
-  LL_ADC_SetChannelSingleDiff(ADC2, LL_ADC_CHANNEL_3, LL_ADC_SINGLE_ENDED);
-  LL_ADC_SetChannelPreselection(ADC2, LL_ADC_CHANNEL_3);
-
 }
 
 
@@ -250,5 +201,5 @@ float ADC_calcSampleTime() {
             Error_Handler();
     }
 
-    return (CONV_TICS + sampling) * 1/(ADC_CLOCK/presc /1000000.f) * 1000.f /2.f ;
+    return (CONV_TICS + sampling) * 1/(ADC_CLOCK/presc /1000000.f) * 1000.f;
 }

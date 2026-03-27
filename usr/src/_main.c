@@ -52,7 +52,7 @@ void mainCycle() {
     getPoint(0, &touchPoint1);
     getPoint(1, &touchPoint2);
 
-    if (adc1cplt == 0) {
+    if (ADCworks == 0) {
         drawScreen();
         ADC_start();
     }
