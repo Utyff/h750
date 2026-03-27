@@ -153,12 +153,12 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
-  while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_2)
+  LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
+  while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_4)
   {
   }
   LL_PWR_ConfigSupply(LL_PWR_LDO_SUPPLY);
-  LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
+  LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE0);
   while (LL_PWR_IsActiveFlag_VOS() == 0)
   {
   }
@@ -176,7 +176,7 @@ void SystemClock_Config(void)
   LL_RCC_PLL1_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_8_16);
   LL_RCC_PLL1_SetVCOOutputRange(LL_RCC_PLLVCORANGE_WIDE);
   LL_RCC_PLL1_SetM(1);
-  LL_RCC_PLL1_SetN(50);
+  LL_RCC_PLL1_SetN(120);
   LL_RCC_PLL1_SetP(2);
   LL_RCC_PLL1_SetQ(2);
   LL_RCC_PLL1_SetR(2);
@@ -204,9 +204,9 @@ void SystemClock_Config(void)
   LL_RCC_SetAPB3Prescaler(LL_RCC_APB3_DIV_2);
   LL_RCC_SetAPB4Prescaler(LL_RCC_APB4_DIV_2);
 
-  LL_Init1msTick(400000000);
+  LL_Init1msTick(480000000);
 
-  LL_SetSystemCoreClock(400000000);
+  LL_SetSystemCoreClock(480000000);
   LL_RCC_HSE_EnableCSS();
 }
 
@@ -219,7 +219,7 @@ void PeriphCommonClock_Config(void)
   LL_RCC_PLL3R_Enable();
   LL_RCC_PLL3_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_4_8);
   LL_RCC_PLL3_SetVCOOutputRange(LL_RCC_PLLVCORANGE_WIDE);
-  LL_RCC_PLL3_SetM(4);
+  LL_RCC_PLL3_SetM(2);
   LL_RCC_PLL3_SetN(50);
   LL_RCC_PLL3_SetP(2);
   LL_RCC_PLL3_SetQ(2);
@@ -530,7 +530,7 @@ static void MX_I2C1_Init(void)
   LL_I2C_DisableGeneralCall(I2C1);
   LL_I2C_EnableClockStretching(I2C1);
   I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
-  I2C_InitStruct.Timing = 0x10C0ECFF;
+  I2C_InitStruct.Timing = 0x307075B1;
   I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
   I2C_InitStruct.DigitalFilter = 0;
   I2C_InitStruct.OwnAddress1 = 0;
