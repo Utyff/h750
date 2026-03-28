@@ -4,6 +4,6 @@
 #include "lcd.h"
 
 #define BUF_SIZE 2048
-extern u8 samplesBuffer[BUF_SIZE];
+extern uint8_t samplesBuffer[BUF_SIZE];
 
 #endif //_DATABUFFER_H

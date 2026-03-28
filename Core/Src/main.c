@@ -214,13 +214,13 @@ void SystemClock_Config(void)
 void PeriphCommonClock_Config(void)
 {
   LL_RCC_PLL3R_Enable();
-  LL_RCC_PLL3_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_4_8);
-  LL_RCC_PLL3_SetVCOOutputRange(LL_RCC_PLLVCORANGE_MEDIUM);
-  LL_RCC_PLL3_SetM(2);
-  LL_RCC_PLL3_SetN(40);
+  LL_RCC_PLL3_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_8_16);
+  LL_RCC_PLL3_SetVCOOutputRange(LL_RCC_PLLVCORANGE_WIDE);
+  LL_RCC_PLL3_SetM(1);
+  LL_RCC_PLL3_SetN(30);
   LL_RCC_PLL3_SetP(2);
   LL_RCC_PLL3_SetQ(2);
-  LL_RCC_PLL3_SetR(4);
+  LL_RCC_PLL3_SetR(8);
   LL_RCC_PLL3_Enable();
 
    /* Wait till PLL is ready */

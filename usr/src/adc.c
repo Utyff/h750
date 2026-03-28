@@ -79,13 +79,16 @@ void ADC_start() {
 
     ADC1_Init();
 
-    LL_ADC_Enable(ADC1);
-    LL_mDelay(2);
-
-    LL_ADC_EnableIT_ADRDY(ADC1);
+    // LL_ADC_EnableIT_ADRDY(ADC1);
     LL_ADC_EnableIT_EOC(ADC1);
     LL_ADC_EnableIT_EOS(ADC1);
     LL_ADC_EnableIT_OVR(ADC1);
+
+    if ((ADC1->CR & (ADC_CR_ADCAL | ADC_CR_JADSTP | ADC_CR_ADSTP | ADC_CR_JADSTART | ADC_CR_ADSTART | ADC_CR_ADDIS | ADC_CR_ADEN)) != 0UL) {
+        Error_Handler();
+    }
+    LL_ADC_Enable(ADC1);
+    while (!LL_ADC_IsActiveFlag_ADRDY(ADC1)) {}
 
     LL_ADC_REG_StartConversion(ADC1);
 
@@ -96,15 +99,26 @@ void ADC_start() {
 static void ADC1_Init(void) {
 
   LL_ADC_REG_StopConversion(ADC1);
+  while (LL_ADC_REG_IsStopConversionOngoing(ADC1)) {}
   LL_ADC_Disable(ADC1);
+  while (LL_ADC_IsDisableOngoing(ADC1)) {}
 
   MODIFY_REG(ADC1->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B);
+  // Common config
+  MODIFY_REG(ADC12_COMMON->CCR,
+             ADC_CCR_CKMODE | ADC_CCR_PRESC | ADC_CCR_DUAL | ADC_CCR_DAMDF | ADC_CCR_DELAY,
+             ADC_Prescaler | LL_ADC_MULTI_INDEPENDENT
+  );
 
+  LL_ADC_SetBoostMode(ADC1, LL_ADC_BOOST_MODE_50MHZ);
   /* Disable ADC deep power down (enabled by default after reset state) */
   LL_ADC_DisableDeepPowerDown(ADC1);
   /* Enable ADC internal voltage regulator */
   LL_ADC_EnableInternalRegulator(ADC1);
   LL_mDelay(LL_ADC_DELAY_INTERNAL_REGUL_STAB_US);
+
+  LL_ADC_StartCalibration(ADC1, LL_ADC_CALIB_OFFSET, LL_ADC_SINGLE_ENDED);
+  while (LL_ADC_IsCalibrationOnGoing(ADC1)) {}
 
   // Configure Regular Channel
   LL_ADC_REG_SetSequencerRanks(ADC1, LL_ADC_REG_RANK_1, LL_ADC_CHANNEL_3);

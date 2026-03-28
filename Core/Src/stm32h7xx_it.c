@@ -252,7 +252,6 @@ void DMA1_Stream2_IRQHandler(void)
     } else if (LL_DMA_IsActiveFlag_TE2(DMA1)) {
         cntDMA1_2E++;
         LL_DMA_ClearFlag_TE2(DMA1);
-        // uart1DMAErrorCallback();
     } else {
         cntDMA1_2O++;
         //Do something
@@ -278,28 +277,30 @@ void ADC_IRQHandler(void)
 
 
     if (LL_ADC_IsActiveFlag_ADRDY(ADC1)) {
-        // ADCworks = 0;
-        // ADCElapsedTick = DWT_Get_Current_Tick() - ADCStartTick;
         cntADC_RDY++;
         LL_ADC_ClearFlag_ADRDY(ADC1);
-    } else if (LL_ADC_IsActiveFlag_EOC(ADC1)) {
+    }
+    if (LL_ADC_IsActiveFlag_EOC(ADC1)) {
         samplesBuffer[cnt++] = ADC1->DR;
         if (cnt>=BUF_SIZE) {
             cnt = 0;
             ADCworks = 0;
             ADCElapsedTick = DWT_Get_Current_Tick() - ADCStartTick;
+            LL_ADC_REG_StopConversion(ADC1);
         }
         cntADC_EOC++;
         LL_ADC_ClearFlag_EOC(ADC1);
-    } else if (LL_ADC_IsActiveFlag_EOS(ADC1)) {
+    }
+    if (LL_ADC_IsActiveFlag_EOS(ADC1)) {
         cntADC_EOS++;
         LL_ADC_ClearFlag_EOS(ADC1);
-    } else if (LL_ADC_IsActiveFlag_OVR(ADC1)) {
+    }
+    if (LL_ADC_IsActiveFlag_OVR(ADC1)) {
         cntADC_OVR++;
         LL_ADC_ClearFlag_OVR(ADC1);
-    } else {
-        cntADC_O++;
     }
+    cntADC_O++;
+
   /* USER CODE END ADC_IRQn 0 */
   /* USER CODE BEGIN ADC_IRQn 1 */
 
