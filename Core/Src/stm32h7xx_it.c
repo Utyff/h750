@@ -23,7 +23,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "adc.h"
-#include "DataBuffer.h"
 #include "dwt.h"
 /* USER CODE END Includes */
 
@@ -263,48 +262,35 @@ void DMA1_Stream2_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles ADC1 and ADC2 global interrupts.
+  * @brief This function handles DMA2 stream0 global interrupt.
   */
-void ADC_IRQHandler(void)
+void DMA2_Stream0_IRQHandler(void)
 {
-  /* USER CODE BEGIN ADC_IRQn 0 */
-    static uint32_t cntADC_RDY = 0;
-    static uint32_t cntADC_EOC = 0;
-    static uint32_t cntADC_EOS = 0;
-    static uint32_t cntADC_OVR = 0;
-    static uint32_t cntADC_O = 0;
-    static uint32_t cnt = 0;
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 0 */
+    static uint32_t cntDMA2_0T = 0;
+    static uint32_t cntDMA2_0H = 0;
+    static uint32_t cntDMA2_0E = 0;
+    static uint32_t cntDMA2_0O = 0;
 
+    if (LL_DMA_IsActiveFlag_TC0(DMA2)) {
+        ADCworks = 0;
+        ADCElapsedTick = DWT_Get_Current_Tick() - ADCStartTick;
+        cntDMA2_0T++;
+        LL_DMA_ClearFlag_TC0(DMA2);
+    }
+    if (LL_DMA_IsActiveFlag_HT0(DMA2)) {
+        cntDMA2_0H++;
+        LL_DMA_ClearFlag_HT0(DMA2);
+    }
+    if (LL_DMA_IsActiveFlag_TE0(DMA2)) {
+        cntDMA2_0E++;
+        LL_DMA_ClearFlag_TE0(DMA2);
+    }
+    cntDMA2_0O++;
+  /* USER CODE END DMA2_Stream0_IRQn 0 */
+  /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
 
-    if (LL_ADC_IsActiveFlag_ADRDY(ADC1)) {
-        cntADC_RDY++;
-        LL_ADC_ClearFlag_ADRDY(ADC1);
-    }
-    if (LL_ADC_IsActiveFlag_EOC(ADC1)) {
-        samplesBuffer[cnt++] = ADC1->DR;
-        if (cnt>=BUF_SIZE) {
-            cnt = 0;
-            ADCworks = 0;
-            ADCElapsedTick = DWT_Get_Current_Tick() - ADCStartTick;
-            LL_ADC_REG_StopConversion(ADC1);
-        }
-        cntADC_EOC++;
-        LL_ADC_ClearFlag_EOC(ADC1);
-    }
-    if (LL_ADC_IsActiveFlag_EOS(ADC1)) {
-        cntADC_EOS++;
-        LL_ADC_ClearFlag_EOS(ADC1);
-    }
-    if (LL_ADC_IsActiveFlag_OVR(ADC1)) {
-        cntADC_OVR++;
-        LL_ADC_ClearFlag_OVR(ADC1);
-    }
-    cntADC_O++;
-
-  /* USER CODE END ADC_IRQn 0 */
-  /* USER CODE BEGIN ADC_IRQn 1 */
-
-  /* USER CODE END ADC_IRQn 1 */
+  /* USER CODE END DMA2_Stream0_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
