@@ -103,7 +103,22 @@ static void ADC1_Init(void) {
   LL_ADC_Disable(ADC1);
   while (LL_ADC_IsDisableOngoing(ADC1)) {}
 
-  MODIFY_REG(ADC1->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B);
+  MODIFY_REG(ADC1->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B | (ADC_CFGR_RES_1 | ADC_CFGR_RES_0));
+  MODIFY_REG(ADC1->CFGR,
+               ADC_CFGR_EXTSEL
+               | ADC_CFGR_EXTEN
+               | ADC_CFGR_DISCEN
+               | ADC_CFGR_DISCNUM
+               | ADC_CFGR_CONT
+               | ADC_CFGR_DMNGT
+               | ADC_CFGR_OVRMOD,
+               LL_ADC_REG_TRIG_SOFTWARE
+               | LL_ADC_REG_SEQ_DISCONT_DISABLE
+               | LL_ADC_REG_CONV_CONTINUOUS
+               | LL_ADC_REG_DR_TRANSFER
+               | LL_ADC_REG_OVR_DATA_OVERWRITTEN
+              );
+
   // Common config
   MODIFY_REG(ADC12_COMMON->CCR,
              ADC_CCR_CKMODE | ADC_CCR_PRESC | ADC_CCR_DUAL | ADC_CCR_DAMDF | ADC_CCR_DELAY,
@@ -111,11 +126,24 @@ static void ADC1_Init(void) {
   );
 
   LL_ADC_SetBoostMode(ADC1, LL_ADC_BOOST_MODE_50MHZ);
-  /* Disable ADC deep power down (enabled by default after reset state) */
-  LL_ADC_DisableDeepPowerDown(ADC1);
-  /* Enable ADC internal voltage regulator */
-  LL_ADC_EnableInternalRegulator(ADC1);
-  LL_mDelay(LL_ADC_DELAY_INTERNAL_REGUL_STAB_US);
+  // - Exit from deep-power-down mode and ADC voltage regulator enable
+  if (LL_ADC_IsDeepPowerDownEnabled(ADC1) != 0UL) {
+      // Disable ADC deep power down mode
+      LL_ADC_DisableDeepPowerDown(ADC1);
+  }
+
+  if (LL_ADC_IsInternalRegulatorEnabled(ADC1) == 0UL) {
+      // Enable ADC internal voltage regulator
+      LL_ADC_EnableInternalRegulator(ADC1);
+      DWT_Delay_us(LL_ADC_DELAY_INTERNAL_REGUL_STAB_US);
+  }
+
+  /* Verification that ADC voltage regulator is correctly enabled, whether    */
+  /* or not ADC is coming from state reset (if any potential problem of       */
+  /* clocking, voltage regulator would not be enabled).                       */
+  if (LL_ADC_IsInternalRegulatorEnabled(ADC1) == 0UL)  {
+      Error_Handler();
+  }
 
   LL_ADC_StartCalibration(ADC1, LL_ADC_CALIB_OFFSET, LL_ADC_SINGLE_ENDED);
   while (LL_ADC_IsCalibrationOnGoing(ADC1)) {}
