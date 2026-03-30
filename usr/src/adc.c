@@ -4,7 +4,7 @@
 #include "adc.h"
 
 // ADC clock freq (Hz)
-#define ADC_CLOCK 50000000.f
+#define ADC_CLOCK 80000000.f
 // RM0433 page 952
 // 8 bit. TSAR timings depending on resolution
 #define CONV_TICS 4.5f
@@ -83,7 +83,8 @@ void ADC_start() {
 
     LL_ADC_Enable(ADC1);
     LL_ADC_Enable(ADC2);
-    LL_mDelay(2);
+    while (!LL_ADC_IsActiveFlag_ADRDY(ADC1)) {}
+    while (!LL_ADC_IsActiveFlag_ADRDY(ADC2)) {}
 
     // Set DMA transfer addresses of source and destination
     LL_DMA_ConfigAddresses(DMA2, LL_DMA_STREAM_0,
@@ -120,7 +121,7 @@ static void ADC1_Init(void) {
   LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_0, LL_DMA_MDATAALIGN_HALFWORD);
   LL_DMA_DisableFifoMode(DMA2, LL_DMA_STREAM_0);
 
-  MODIFY_REG(ADC1->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B);
+  MODIFY_REG(ADC1->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B|ADC_CFGR_RES_1 | ADC_CFGR_RES_0);
   // Common config
   MODIFY_REG(ADC12_COMMON->CCR,
              ADC_CCR_CKMODE | ADC_CCR_PRESC | ADC_CCR_DUAL | ADC_CCR_DAMDF | ADC_CCR_DELAY,
@@ -145,7 +146,7 @@ static void ADC2_Init(void) {
 
   /** Common config */
   LL_ADC_SetOverSamplingScope(ADC2, LL_ADC_OVS_DISABLE);
-  MODIFY_REG(ADC2->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B);
+  MODIFY_REG(ADC2->CFGR, ADC_CFGR_RES, LL_ADC_RESOLUTION_8B|ADC_CFGR_RES_1 | ADC_CFGR_RES_0);
   LL_ADC_REG_SetDataTransferMode(ADC2, LL_ADC_REG_DMA_TRANSFER_UNLIMITED);
 
   /* Disable ADC deep power down (enabled by default after reset state) */

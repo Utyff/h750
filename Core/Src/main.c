@@ -220,7 +220,7 @@ void PeriphCommonClock_Config(void)
   LL_RCC_PLL3_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_4_8);
   LL_RCC_PLL3_SetVCOOutputRange(LL_RCC_PLLVCORANGE_WIDE);
   LL_RCC_PLL3_SetM(2);
-  LL_RCC_PLL3_SetN(50);
+  LL_RCC_PLL3_SetN(80);
   LL_RCC_PLL3_SetP(2);
   LL_RCC_PLL3_SetQ(2);
   LL_RCC_PLL3_SetR(4);
@@ -287,7 +287,7 @@ static void MX_ADC1_Init(void)
   LL_DMA_DisableFifoMode(DMA2, LL_DMA_STREAM_0);
 
   /* USER CODE BEGIN ADC1_Init 1 */
-
+//  ADC_InitStruct.Resolution = LL_ADC_RESOLUTION_8B|ADC_CFGR_RES_1 | ADC_CFGR_RES_0;
   /* USER CODE END ADC1_Init 1 */
 
   /** Common config
@@ -370,7 +370,7 @@ static void MX_ADC2_Init(void)
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE BEGIN ADC2_Init 1 */
-
+//  ADC_InitStruct.Resolution = LL_ADC_RESOLUTION_8B|ADC_CFGR_RES_1 | ADC_CFGR_RES_0;
   /* USER CODE END ADC2_Init 1 */
 
   /** Common config
