@@ -218,9 +218,9 @@ void PeriphCommonClock_Config(void)
 {
   LL_RCC_PLL3R_Enable();
   LL_RCC_PLL3_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_4_8);
-  LL_RCC_PLL3_SetVCOOutputRange(LL_RCC_PLLVCORANGE_WIDE);
+  LL_RCC_PLL3_SetVCOOutputRange(LL_RCC_PLLVCORANGE_MEDIUM);
   LL_RCC_PLL3_SetM(4);
-  LL_RCC_PLL3_SetN(50);
+  LL_RCC_PLL3_SetN(40);
   LL_RCC_PLL3_SetP(2);
   LL_RCC_PLL3_SetQ(2);
   LL_RCC_PLL3_SetR(4);
@@ -641,7 +641,7 @@ static void MX_TIM4_Init(void)
   /* USER CODE BEGIN TIM4_Init 1 */
 
   /* USER CODE END TIM4_Init 1 */
-  TIM_InitStruct.Prescaler = 5;
+  TIM_InitStruct.Prescaler = 10;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
   TIM_InitStruct.Autoreload = 5;
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;

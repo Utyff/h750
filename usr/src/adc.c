@@ -83,7 +83,8 @@ void ADC_start() {
 
     LL_ADC_Enable(ADC1);
     LL_ADC_Enable(ADC2);
-    LL_mDelay(2);
+    while (!LL_ADC_IsActiveFlag_ADRDY(ADC1)) {}
+    while (!LL_ADC_IsActiveFlag_ADRDY(ADC2)) {}
 
     // Set DMA transfer addresses of source and destination
     LL_DMA_ConfigAddresses(DMA2, LL_DMA_STREAM_0,

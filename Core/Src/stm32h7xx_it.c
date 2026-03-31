@@ -251,7 +251,6 @@ void DMA1_Stream2_IRQHandler(void)
     } else if (LL_DMA_IsActiveFlag_TE2(DMA1)) {
         cntDMA1_2E++;
         LL_DMA_ClearFlag_TE2(DMA1);
-        // uart1DMAErrorCallback();
     } else {
         cntDMA1_2O++;
         //Do something
@@ -278,15 +277,16 @@ void DMA2_Stream0_IRQHandler(void)
         ADCElapsedTick = DWT_Get_Current_Tick() - ADCStartTick;
         cntDMA2_0T++;
         LL_DMA_ClearFlag_TC0(DMA2);
-    } else if (LL_DMA_IsActiveFlag_HT0(DMA2)) {
+    }
+    if (LL_DMA_IsActiveFlag_HT0(DMA2)) {
         cntDMA2_0H++;
         LL_DMA_ClearFlag_HT0(DMA2);
-    } else if (LL_DMA_IsActiveFlag_TE0(DMA2)) {
+    }
+    if (LL_DMA_IsActiveFlag_TE0(DMA2)) {
         cntDMA2_0E++;
         LL_DMA_ClearFlag_TE0(DMA2);
-    } else {
-        cntDMA2_0O++;
     }
+    cntDMA2_0O++;
   /* USER CODE END DMA2_Stream0_IRQn 0 */
   /* USER CODE BEGIN DMA2_Stream0_IRQn 1 */
 
